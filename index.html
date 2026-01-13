@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="MewVolt - The Electric Memecoin That Powers Your Portfolio">
     <title>MewVolt - Electric Memecoin</title>
+    <!-- Favicon - For 1:1 aspect ratio, ensure character.png is square or create a favicon.ico -->
+    <link rel="icon" type="image/png" href="character.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="character.png" sizes="16x16">
+    <link rel="apple-touch-icon" href="character.png">
+    <!-- Alternative: Create a square favicon.ico file for better 1:1 display -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -329,6 +334,30 @@
         .hero-logo:hover {
             transform: scale(1.05) rotate(2deg);
             filter: drop-shadow(0 15px 40px rgba(255, 215, 0, 0.6));
+        }
+
+        .hero-contract {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 20px;
+            border: 2px solid;
+            border-image: linear-gradient(135deg, rgba(255, 215, 0, 0.5), rgba(50, 205, 50, 0.5), rgba(255, 165, 0, 0.5)) 1;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: fadeInUp 1s ease-out 0.3s both;
+            text-align: center;
+        }
+
+        .hero-contract h3 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            letter-spacing: 2px;
         }
 
         @keyframes float {
@@ -818,6 +847,110 @@
             color: rgba(255, 255, 255, 0.9);
         }
 
+        .contract-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .contract-address {
+            flex: 1;
+            min-width: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--primary);
+            background: rgba(255, 215, 0, 0.1);
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            word-break: break-all;
+            user-select: all;
+        }
+
+        .hero-contract .contract-address {
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-contract {
+                padding: 20px 15px;
+                margin: 0 auto 25px;
+            }
+
+            .hero-contract .contract-wrapper {
+                flex-direction: column;
+            }
+
+            .hero-contract .contract-address {
+                width: 100%;
+                font-size: 0.75rem;
+            }
+        }
+
+        .copy-btn {
+            background: var(--gradient-primary);
+            border: none;
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .copy-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--darker);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .copy-btn.copied {
+            background: var(--secondary);
+        }
+
+        .copy-btn.copied svg {
+            fill: var(--darker);
+        }
+
+        .pump-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: var(--gradient-primary);
+            color: var(--darker);
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 700;
+            font-family: 'Rajdhani', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .pump-link:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        .pump-link::before {
+            content: '🚀';
+            font-size: 1.2rem;
+        }
+
         .highlight {
             color: var(--accent);
             font-weight: bold;
@@ -1256,6 +1389,18 @@
     <section class="hero">
         <div class="hero-content container">
             <img src="character.png" alt="MewVolt - Rato Elétrico" class="hero-logo" data-i18n-alt="characterAlt">
+            <div class="hero-contract">
+                <h3 data-i18n="contractAddress">Contract Address</h3>
+                <div class="contract-wrapper">
+                    <code class="contract-address" id="contractAddress">C17JZftSSK9KzdfMuE7cWEmk8ptY2CYvszPU3XMwpump</code>
+                    <button class="copy-btn" id="copyBtn" aria-label="Copy contract address" title="Copy">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                        </svg>
+                    </button>
+                </div>
+                <a href="https://pump.fun/coin/C17JZftSSK9KzdfMuE7cWEmk8ptY2CYvszPU3XMwpump" target="_blank" rel="noopener noreferrer" class="pump-link" data-i18n="viewOnPump">View on Pump.fun</a>
+            </div>
             <h1>⚡ MewVolt</h1>
             <p class="tagline" data-i18n="tagline">O Memecoin Elétrico Alimentado pela Comunidade</p>
             <div class="hero-buttons">
@@ -1441,6 +1586,8 @@
                 characterAlt: "MewVolt - Rato Elétrico",
                 renounced: "Renunciado",
                 mewVoltToken: "MewVolt",
+                contractAddress: "Endereço do Contrato",
+                viewOnPump: "Ver no Pump.fun",
                 copyright: "&copy; 2026 MewVolt. Todos os direitos reservados.",
                 poweredBy: "⚡ Alimentado por Energia Elétrica ⚡",
                 wpOverviewTitle: "📋 Visão Geral do Projeto",
@@ -1506,6 +1653,8 @@
                 characterAlt: "MewVolt - Electric Mouse",
                 renounced: "Renounced",
                 mewVoltToken: "MewVolt",
+                contractAddress: "Contract Address",
+                viewOnPump: "View on Pump.fun",
                 copyright: "&copy; 2026 MewVolt. All rights reserved.",
                 poweredBy: "⚡ Powered by Electric Energy ⚡",
                 wpOverviewTitle: "📋 Project Overview",
@@ -1571,6 +1720,8 @@
                 characterAlt: "MewVolt - Ratón Eléctrico",
                 renounced: "Renunciado",
                 mewVoltToken: "MewVolt",
+                contractAddress: "Dirección del Contrato",
+                viewOnPump: "Ver en Pump.fun",
                 copyright: "&copy; 2026 MewVolt. Todos los derechos reservados.",
                 poweredBy: "⚡ Impulsado por Energía Eléctrica ⚡",
                 wpOverviewTitle: "📋 Visión General del Proyecto",
@@ -1686,6 +1837,46 @@
 
         // Initialize language on page load
         setLanguage(currentLanguage);
+
+        // Copy contract address functionality
+        const copyBtn = document.getElementById('copyBtn');
+        const contractAddress = document.getElementById('contractAddress');
+        
+        if (copyBtn && contractAddress) {
+            copyBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(contractAddress.textContent);
+                    copyBtn.classList.add('copied');
+                    const originalTitle = copyBtn.getAttribute('title');
+                    copyBtn.setAttribute('title', 'Copied!');
+                    copyBtn.setAttribute('aria-label', 'Contract address copied');
+                    
+                    setTimeout(() => {
+                        copyBtn.classList.remove('copied');
+                        copyBtn.setAttribute('title', originalTitle);
+                        copyBtn.setAttribute('aria-label', 'Copy contract address');
+                    }, 2000);
+                } catch (err) {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = contractAddress.textContent;
+                    textArea.style.position = 'fixed';
+                    textArea.style.opacity = '0';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        copyBtn.classList.add('copied');
+                        setTimeout(() => {
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Failed to copy:', err);
+                    }
+                    document.body.removeChild(textArea);
+                }
+            });
+        }
 
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

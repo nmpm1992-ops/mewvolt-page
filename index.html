@@ -12,7 +12,7 @@
     <!-- Alternative: Create a square favicon.ico file for better 1:1 display -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&family=Fredoka:wght@400;500;600;700&family=Comic+Neue:wght@400;700&family=Bungee&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -21,27 +21,72 @@
         }
 
         :root {
-            --primary: #FFD700;
-            --secondary: #32CD32;
-            --accent: #FFA500;
-            --success: #90EE90;
+            /* Light Mode Colors - Soft pastels that match character */
+            --primary-light: #D4AF37;
+            --secondary-light: #228B22;
+            --accent-light: #E91E63;
+            --success-light: #4CAF50;
+            --bg-light: #FFFFFF;
+            --bg-card-light: #FFFFFF;
+            --text-light: #000000;
+            --text-secondary-light: #1a1a1a;
+            --border-light: #333333;
+            
+            /* Dark Mode Colors - Vibrant but readable */
+            --primary-dark: #FFD700;
+            --secondary-dark: #32CD32;
+            --accent-dark: #FF6B9D;
+            --success-dark: #90EE90;
+            --bg-dark: #0f1e0f;
+            --bg-card-dark: rgba(26, 46, 26, 0.85);
+            --text-dark: #ffffff;
+            --text-secondary-dark: rgba(255, 255, 255, 0.85);
+            --border-dark: rgba(255, 215, 0, 0.3);
+            
+            /* Default (Dark Mode) */
+            --primary: var(--primary-dark);
+            --secondary: var(--secondary-dark);
+            --accent: var(--accent-dark);
+            --success: var(--success-dark);
+            --bg: var(--bg-dark);
+            --bg-card: var(--bg-card-dark);
+            --text: var(--text-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --border: var(--border-dark);
             --dark: #1a2e1a;
             --darker: #0f1e0f;
             --light: #ffffff;
-            --gray: rgba(255, 255, 255, 0.7);
-            --gradient: linear-gradient(135deg, #FFD700 0%, #32CD32 50%, #FFA500 100%);
-            --gradient-glow: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(50, 205, 50, 0.3) 50%, rgba(255, 165, 0, 0.3) 100%);
-            --gradient-primary: linear-gradient(135deg, #FFD700 0%, #32CD32 100%);
-            --gradient-accent: linear-gradient(135deg, #FFD700 0%, #90EE90 100%);
+            --gray: var(--text-secondary);
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            --gradient-glow: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(50, 205, 50, 0.2) 50%, rgba(255, 107, 157, 0.2) 100%);
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+
+        [data-theme="light"] {
+            --primary: var(--primary-light);
+            --secondary: var(--secondary-light);
+            --accent: var(--accent-light);
+            --success: var(--success-light);
+            --bg: var(--bg-light);
+            --bg-card: var(--bg-card-light);
+            --text: var(--text-light);
+            --text-secondary: var(--text-secondary-light);
+            --border: #000000;
+            --dark: #F5F5F5;
+            --darker: #E0E0E0;
+            --light: #000000;
+            --gray: var(--text-secondary-light);
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--darker) url('bg.png') center/cover no-repeat fixed;
-            color: var(--light);
+            font-family: 'Comic Neue', 'Fredoka', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg) url('bg.png') center/cover no-repeat fixed;
+            color: var(--text);
             overflow-x: hidden;
-            line-height: 1.6;
+            line-height: 1.7;
             font-weight: 400;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         body::before {
@@ -51,8 +96,15 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(15, 30, 15, 0.85);
+            background: var(--bg);
+            opacity: 0.85;
             z-index: -1;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
+        }
+
+        [data-theme="light"] body::before {
+            opacity: 0.3;
+            background: #FFFFFF;
         }
 
         .container {
@@ -66,13 +118,13 @@
             padding: 20px 0;
             position: sticky;
             top: 0;
-            background: rgba(15, 30, 15, 0.85);
+            background: var(--bg-card);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
             z-index: 1000;
-            border-bottom: 3px solid;
-            border-image: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent), var(--primary)) 1;
-            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.1);
+            border-bottom: 4px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         nav {
@@ -202,13 +254,13 @@
             position: absolute;
             top: calc(100% + 10px);
             right: 0;
-            background: rgba(15, 30, 15, 0.98);
+            background: var(--bg-card);
             backdrop-filter: blur(20px);
-            border: 2px solid var(--primary);
+            border: 3px solid var(--border);
             border-radius: 15px;
             padding: 10px;
             min-width: 150px;
-            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
@@ -227,8 +279,8 @@
             cursor: pointer;
             border-radius: 10px;
             transition: all 0.2s ease;
-            color: var(--light);
-            font-family: 'Rajdhani', sans-serif;
+            color: var(--text);
+            font-family: 'Comic Neue', 'Fredoka', sans-serif;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -243,6 +295,38 @@
         .language-option.active {
             background: var(--gradient-primary);
             color: var(--darker);
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            background: transparent;
+            border: 3px solid var(--primary);
+            color: var(--primary);
+            padding: 10px 15px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+            font-size: 1.2rem;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            box-shadow: 
+                3px 3px 0px rgba(0, 0, 0, 0.2),
+                0 0 15px rgba(255, 215, 0, 0.3);
+            transform: rotate(-1deg);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: var(--darker);
+            transform: rotate(2deg) translateY(-2px) scale(1.1);
+            box-shadow: 
+                5px 5px 0px rgba(0, 0, 0, 0.3),
+                0 0 25px rgba(255, 215, 0, 0.6);
         }
 
         /* Hero Section */
@@ -340,24 +424,27 @@
             max-width: 600px;
             margin: 0 auto 30px;
             padding: 25px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-            border-radius: 20px;
-            border: 2px solid;
-            border-image: linear-gradient(135deg, rgba(255, 215, 0, 0.5), rgba(50, 205, 50, 0.5), rgba(255, 165, 0, 0.5)) 1;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+            border-radius: 25px;
+            border: 4px solid var(--border);
             backdrop-filter: blur(10px);
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            animation: fadeInUp 1s ease-out 0.3s both;
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.3),
+                0 8px 25px rgba(255, 215, 0, 0.2);
+            animation: fadeInUp 1s ease-out 0.3s both, comicFloat 4s ease-in-out infinite 1.5s;
             text-align: center;
+            transform: rotate(1deg);
         }
 
         .hero-contract h3 {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             color: var(--primary);
             margin-bottom: 15px;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
+            text-shadow: 2px 2px 0px var(--border);
+            transform: rotate(-0.5deg);
         }
 
         @keyframes float {
@@ -375,22 +462,102 @@
             }
         }
 
-        .hero h1 {
-            font-size: clamp(3rem, 8vw, 6rem);
-            margin-bottom: 20px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            background: var(--gradient);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: fadeInUp 1s ease-out, gradientShift 4s ease-in-out infinite;
-            letter-spacing: 6px;
+        /* Comic-style wavy titles */
+        .comic-title {
+            font-family: 'Fredoka', 'Bungee', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
             position: relative;
             display: inline-block;
-            -webkit-text-stroke: 2px transparent;
-            text-rendering: optimizeLegibility;
+            transform: rotate(-1deg);
+            animation: comicBounce 3s ease-in-out infinite;
+            filter: drop-shadow(4px 4px 0px rgba(0, 0, 0, 0.3));
+        }
+
+        @keyframes comicBounce {
+            0%, 100% { transform: rotate(-1deg) translateY(0); }
+            50% { transform: rotate(1deg) translateY(-5px); }
+        }
+
+        .comic-title::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: -1;
+            color: var(--text);
+            -webkit-text-stroke: 8px var(--border);
+            filter: blur(2px);
+        }
+
+        .comic-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.3) 10px,
+                rgba(255, 255, 255, 0.3) 12px
+            );
+            transform: rotate(-2deg);
+            z-index: -1;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 7vw, 5.5rem);
+            margin-bottom: 25px;
+            font-family: 'Fredoka', 'Bungee', sans-serif;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 
+                4px 4px 0px var(--border),
+                6px 6px 0px rgba(0, 0, 0, 0.2),
+                8px 8px 20px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 1s ease-out, comicBounce 3s ease-in-out infinite 1s;
+            letter-spacing: 3px;
+            position: relative;
+            display: inline-block;
+            transform: rotate(-1deg);
+            line-height: 1.1;
+        }
+
+        [data-theme="light"] .hero h1 {
+            text-shadow: 
+                4px 4px 0px var(--border),
+                6px 6px 0px rgba(0, 0, 0, 0.3),
+                8px 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero h1::before {
+            content: '⚡';
+            position: absolute;
+            left: -50px;
+            top: -20px;
+            font-size: 0.6em;
+            animation: electricWiggle 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+        }
+
+        .hero h1::after {
+            content: '⚡';
+            position: absolute;
+            right: -50px;
+            top: -20px;
+            font-size: 0.6em;
+            animation: electricWiggle 2s ease-in-out infinite 0.5s;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+        }
+
+        @keyframes electricWiggle {
+            0%, 100% { transform: rotate(-10deg) scale(1); }
+            25% { transform: rotate(10deg) scale(1.2); }
+            50% { transform: rotate(-5deg) scale(1.1); }
+            75% { transform: rotate(5deg) scale(1.15); }
         }
 
         @keyframes gradientShift {
@@ -444,18 +611,31 @@
         }
 
         .tagline {
-            font-size: clamp(1.2rem, 3vw, 2rem);
+            font-size: clamp(1.3rem, 3.5vw, 2.2rem);
             margin-bottom: 40px;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Comic Neue', 'Fredoka', sans-serif;
             font-weight: 700;
-            background: var(--gradient-accent);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: fadeInUp 1s ease-out 0.2s both, gradientShiftTagline 3s ease-in-out infinite;
-            letter-spacing: 3px;
-            text-rendering: optimizeLegibility;
+            color: var(--secondary);
+            text-shadow: 
+                3px 3px 0px var(--border),
+                5px 5px 0px rgba(0, 0, 0, 0.2);
+            animation: fadeInUp 1s ease-out 0.2s both, comicFloat 4s ease-in-out infinite 1.2s;
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+            transform: rotate(0.5deg);
+            line-height: 1.3;
+        }
+
+        [data-theme="light"] .tagline {
+            text-shadow: 
+                3px 3px 0px var(--border),
+                5px 5px 0px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes comicFloat {
+            0%, 100% { transform: rotate(0.5deg) translateY(0); }
+            50% { transform: rotate(-0.5deg) translateY(-3px); }
         }
 
         @keyframes gradientShiftTagline {
@@ -478,24 +658,37 @@
 
         .btn {
             padding: 18px 36px;
-            border-radius: 50px;
+            border-radius: 25px;
             text-decoration: none;
             font-weight: 700;
             font-size: 1.1rem;
-            font-family: 'Rajdhani', sans-serif;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 3px solid transparent;
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 4px solid var(--border);
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.3),
+                0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: rotate(-1deg);
+        }
+
+        .btn:hover {
+            transform: rotate(1deg) translateY(-3px);
+            box-shadow: 
+                8px 8px 0px rgba(0, 0, 0, 0.4),
+                0 6px 20px rgba(255, 215, 0, 0.4);
         }
 
         .btn-primary {
             background: var(--gradient-primary);
             color: var(--darker);
-            box-shadow: 0 6px 25px rgba(255, 215, 0, 0.4), 0 0 40px rgba(50, 205, 50, 0.2);
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.4),
+                0 6px 25px rgba(255, 215, 0, 0.4), 
+                0 0 40px rgba(50, 205, 50, 0.2);
         }
 
         .btn-primary::before {
@@ -517,15 +710,20 @@
         }
 
         .btn-primary:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.6), 0 0 60px rgba(50, 205, 50, 0.4);
+            transform: rotate(2deg) translateY(-5px) scale(1.05);
+            box-shadow: 
+                8px 8px 0px rgba(0, 0, 0, 0.5),
+                0 10px 40px rgba(255, 215, 0, 0.6), 
+                0 0 60px rgba(50, 205, 50, 0.4);
         }
 
         .btn-secondary {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.1);
             color: var(--primary);
             border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            box-shadow: 
+                6px 6px 0px rgba(255, 215, 0, 0.3),
+                0 0 20px rgba(255, 215, 0, 0.2);
         }
 
         .btn-secondary::before {
@@ -545,10 +743,13 @@
         }
 
         .btn-secondary:hover {
+            background: var(--primary);
             color: var(--darker);
-            border-color: var(--primary);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-            transform: translateY(-3px) scale(1.05);
+            border-color: var(--border);
+            box-shadow: 
+                8px 8px 0px rgba(255, 215, 0, 0.5),
+                0 0 30px rgba(255, 215, 0, 0.6);
+            transform: rotate(-2deg) translateY(-3px) scale(1.05);
         }
 
         @keyframes fadeInUp {
@@ -565,8 +766,12 @@
         /* Features Section */
         .features {
             padding: 100px 20px;
-            background: linear-gradient(180deg, rgba(26, 46, 26, 0.95) 0%, rgba(15, 30, 15, 0.98) 100%);
+            background: linear-gradient(180deg, rgba(26, 46, 26, 0.85) 0%, rgba(15, 30, 15, 0.9) 100%);
             position: relative;
+        }
+
+        [data-theme="light"] .features {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8F8F8 100%);
         }
 
         .features::before {
@@ -584,17 +789,32 @@
             text-align: center;
             font-size: clamp(2rem, 5vw, 3.5rem);
             margin-bottom: 60px;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            background: var(--gradient);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 4px;
-            animation: gradientShift 4s ease-in-out infinite;
+            font-family: 'Fredoka', 'Bungee', sans-serif;
+            font-weight: 700;
+            color: var(--primary);
+            text-shadow: 
+                4px 4px 0px var(--border),
+                6px 6px 0px rgba(0, 0, 0, 0.2),
+                8px 8px 15px rgba(0, 0, 0, 0.1);
+            letter-spacing: 3px;
+            animation: comicTitleBounce 4s ease-in-out infinite;
             position: relative;
-            text-rendering: optimizeLegibility;
+            display: inline-block;
+            transform: rotate(-1deg);
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+
+        [data-theme="light"] .section-title {
+            text-shadow: 
+                4px 4px 0px var(--border),
+                6px 6px 0px rgba(0, 0, 0, 0.3),
+                8px 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes comicTitleBounce {
+            0%, 100% { transform: rotate(-1deg) translateY(0) scale(1); }
+            50% { transform: rotate(1deg) translateY(-5px) scale(1.02); }
         }
 
         .section-title::before,
@@ -642,19 +862,27 @@
         }
 
         .feature-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
-            padding: 50px 35px;
-            border-radius: 25px;
-            border: 3px solid;
-            border-image: linear-gradient(135deg, rgba(255, 215, 0, 0.6), rgba(50, 205, 50, 0.6), rgba(255, 165, 0, 0.6)) 1;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--bg-card);
+            padding: 40px 30px;
+            border-radius: 30px;
+            border: 4px solid var(--border);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             text-align: center;
             position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 
-                        0 0 40px rgba(255, 215, 0, 0.15),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            overflow: visible;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                8px 8px 0px rgba(0, 0, 0, 0.2),
+                0 8px 32px rgba(0, 0, 0, 0.15), 
+                0 0 40px rgba(255, 215, 0, 0.1);
+            transform: rotate(-1deg);
+        }
+
+        [data-theme="light"] .feature-card {
+            background: #FFFFFF;
+            box-shadow: 
+                8px 8px 0px rgba(0, 0, 0, 0.3),
+                0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .feature-card::before {
@@ -701,40 +929,49 @@
         }
 
         .feature-card:hover {
-            transform: translateY(-15px) scale(1.03);
-            border-image: linear-gradient(135deg, rgba(255, 215, 0, 1), rgba(50, 205, 50, 1), rgba(255, 165, 0, 1)) 1;
-            box-shadow: 0 25px 60px rgba(255, 215, 0, 0.5), 
-                        0 0 100px rgba(50, 205, 50, 0.4),
-                        0 0 150px rgba(255, 165, 0, 0.2),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transform: rotate(2deg) translateY(-10px) scale(1.05);
+            box-shadow: 
+                12px 12px 0px rgba(0, 0, 0, 0.4),
+                0 15px 40px rgba(255, 215, 0, 0.4), 
+                0 0 60px rgba(50, 205, 50, 0.3);
+            border-color: var(--primary);
         }
 
         .feature-icon {
             font-size: 4rem;
             margin-bottom: 25px;
             display: inline-block;
-            transition: transform 0.4s ease;
-            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.5));
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 15px rgba(255, 215, 0, 0.5));
+            animation: iconBounce 3s ease-in-out infinite;
+        }
+
+        @keyframes iconBounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(5deg); }
         }
 
         .feature-card:hover .feature-icon {
-            transform: scale(1.2) rotate(10deg);
+            transform: scale(1.3) rotate(15deg) translateY(-5px);
+            animation: none;
         }
 
         .feature-card h3 {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             margin-bottom: 15px;
             color: var(--primary);
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
             font-weight: 700;
-            letter-spacing: 2px;
-            text-rendering: optimizeLegibility;
+            letter-spacing: 1.5px;
+            text-shadow: 2px 2px 0px var(--border);
+            transform: rotate(-0.5deg);
         }
 
         .feature-card p {
-            color: var(--gray);
+            color: var(--text-secondary);
             line-height: 1.8;
             font-size: 1.05rem;
+            font-family: 'Comic Neue', sans-serif;
         }
 
         /* Tokenomics Section */
@@ -742,6 +979,10 @@
             padding: 100px 20px;
             text-align: center;
             position: relative;
+        }
+
+        [data-theme="light"] .tokenomics {
+            background: linear-gradient(180deg, #F8F8F8 0%, #FFFFFF 100%);
         }
 
         .tokenomics::before {
@@ -758,18 +999,25 @@
         .tokenomics-content {
             max-width: 900px;
             margin: 0 auto;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
-            padding: 60px;
-            border-radius: 40px;
-            border: 3px solid;
-            border-image: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent), var(--primary)) 1;
-            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.3), 
-                        0 0 80px rgba(50, 205, 50, 0.2),
-                        inset 0 0 60px rgba(50, 205, 50, 0.08),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
+            background: var(--bg-card);
+            padding: 50px;
+            border-radius: 35px;
+            border: 4px solid var(--border);
+            box-shadow: 
+                8px 8px 0px rgba(0, 0, 0, 0.2),
+                0 20px 60px rgba(255, 215, 0, 0.3), 
+                0 0 80px rgba(50, 205, 50, 0.2);
+            backdrop-filter: blur(12px);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            transform: rotate(-0.5deg);
+        }
+
+        [data-theme="light"] .tokenomics-content {
+            background: #FFFFFF;
+            box-shadow: 
+                8px 8px 0px rgba(0, 0, 0, 0.3),
+                0 20px 60px rgba(0, 0, 0, 0.1);
         }
 
         .tokenomics-content::before {
@@ -784,16 +1032,25 @@
         }
 
         .tokenomics-item {
-            margin: 35px 0;
-            padding: 35px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(50, 205, 50, 0.15) 100%);
-            border-radius: 20px;
+            margin: 30px 0;
+            padding: 30px;
+            background: var(--bg-card);
+            border-radius: 25px;
+            border: 4px solid var(--border);
             position: relative;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.25),
-                        0 0 30px rgba(50, 205, 50, 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.2),
+                0 8px 25px rgba(255, 215, 0, 0.2);
+            overflow: visible;
+            transform: rotate(-0.5deg);
+        }
+
+        [data-theme="light"] .tokenomics-item {
+            background: #FFFFFF;
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.3),
+                0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
         .tokenomics-item::after {
@@ -825,26 +1082,30 @@
         }
 
         .tokenomics-item:hover {
-            transform: translateX(10px) scale(1.02);
-            box-shadow: 0 15px 45px rgba(255, 215, 0, 0.4),
-                        0 0 50px rgba(50, 205, 50, 0.2),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.25) 0%, rgba(50, 205, 50, 0.2) 100%);
+            transform: rotate(1deg) translateX(5px) scale(1.03);
+            box-shadow: 
+                10px 10px 0px rgba(0, 0, 0, 0.4),
+                0 15px 45px rgba(255, 215, 0, 0.4),
+                0 0 50px rgba(50, 205, 50, 0.2);
+            border-color: var(--primary);
         }
 
         .tokenomics-item h3 {
             font-size: 1.8rem;
             color: var(--primary);
             margin-bottom: 10px;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
             font-weight: 700;
-            letter-spacing: 2px;
-            text-rendering: optimizeLegibility;
+            letter-spacing: 1.5px;
+            text-shadow: 2px 2px 0px var(--border);
+            transform: rotate(0.5deg);
         }
 
         .tokenomics-item p {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            font-family: 'Comic Neue', sans-serif;
+            line-height: 1.6;
         }
 
         .contract-wrapper {
@@ -861,12 +1122,24 @@
             font-family: 'Courier New', monospace;
             font-size: 0.9rem;
             color: var(--primary);
-            background: rgba(255, 215, 0, 0.1);
+            background: rgba(255, 215, 0, 0.15);
             padding: 12px 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            border: 3px solid var(--border);
             word-break: break-all;
             user-select: all;
+            box-shadow: 
+                3px 3px 0px rgba(0, 0, 0, 0.2),
+                inset 0 2px 4px rgba(255, 215, 0, 0.2);
+            transform: rotate(-0.5deg);
+            transition: all 0.3s ease;
+        }
+
+        .contract-address:hover {
+            transform: rotate(0.5deg) scale(1.02);
+            box-shadow: 
+                4px 4px 0px rgba(0, 0, 0, 0.3),
+                inset 0 2px 4px rgba(255, 215, 0, 0.3);
         }
 
         .hero-contract .contract-address {
@@ -891,15 +1164,18 @@
 
         .copy-btn {
             background: var(--gradient-primary);
-            border: none;
+            border: 3px solid var(--border);
             padding: 12px 15px;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 
+                4px 4px 0px rgba(0, 0, 0, 0.3),
+                0 4px 15px rgba(255, 215, 0, 0.3);
+            transform: rotate(-1deg);
         }
 
         .copy-btn svg {
@@ -909,8 +1185,10 @@
         }
 
         .copy-btn:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+            transform: rotate(2deg) translateY(-3px) scale(1.1);
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.4),
+                0 6px 20px rgba(255, 215, 0, 0.5);
         }
 
         .copy-btn:active {
@@ -934,16 +1212,22 @@
             background: var(--gradient-primary);
             color: var(--darker);
             text-decoration: none;
-            border-radius: 25px;
+            border-radius: 20px;
+            border: 3px solid var(--border);
             font-weight: 700;
-            font-family: 'Rajdhani', sans-serif;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 
+                4px 4px 0px rgba(0, 0, 0, 0.3),
+                0 4px 15px rgba(255, 215, 0, 0.3);
+            transform: rotate(1deg);
         }
 
         .pump-link:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+            transform: rotate(-1deg) translateY(-4px) scale(1.08);
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.4),
+                0 8px 25px rgba(255, 215, 0, 0.5);
         }
 
         .pump-link::before {
@@ -959,8 +1243,12 @@
         /* Whitepaper Section */
         .whitepaper {
             padding: 100px 20px;
-            background: linear-gradient(180deg, rgba(15, 30, 15, 0.98) 0%, rgba(26, 46, 26, 0.95) 100%);
+            background: linear-gradient(180deg, rgba(15, 30, 15, 0.9) 0%, rgba(26, 46, 26, 0.85) 100%);
             position: relative;
+        }
+
+        [data-theme="light"] .whitepaper {
+            background: linear-gradient(180deg, #F8F8F8 0%, #FFFFFF 100%);
         }
 
         .whitepaper::before {
@@ -980,19 +1268,20 @@
         }
 
         .whitepaper-section {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
-            padding: 40px;
-            border-radius: 25px;
-            border: 3px solid;
-            border-image: linear-gradient(135deg, rgba(255, 215, 0, 0.6), rgba(50, 205, 50, 0.6), rgba(255, 165, 0, 0.6)) 1;
+            background: var(--bg-card);
+            padding: 35px;
+            border-radius: 30px;
+            border: 4px solid var(--border);
             margin-bottom: 30px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 
-                        0 0 40px rgba(255, 215, 0, 0.15),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.2),
+                0 8px 32px rgba(0, 0, 0, 0.15), 
+                0 0 40px rgba(255, 215, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            transform: rotate(0.5deg);
         }
 
         .whitepaper-section::before {
@@ -1027,27 +1316,31 @@
         }
 
         .whitepaper-section:hover {
-            transform: translateY(-8px) scale(1.01);
-            border-image: linear-gradient(135deg, rgba(255, 215, 0, 1), rgba(50, 205, 50, 1), rgba(255, 165, 0, 1)) 1;
-            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4), 
-                        0 0 80px rgba(50, 205, 50, 0.3),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transform: rotate(-0.5deg) translateY(-8px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 
+                10px 10px 0px rgba(0, 0, 0, 0.4),
+                0 20px 60px rgba(255, 215, 0, 0.4), 
+                0 0 80px rgba(50, 205, 50, 0.3);
         }
 
         .whitepaper-section h3 {
-            font-size: 1.8rem;
+            font-size: 1.9rem;
             color: var(--primary);
             margin-bottom: 20px;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
             font-weight: 700;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
+            text-shadow: 2px 2px 0px var(--border);
+            transform: rotate(-0.5deg);
         }
 
         .whitepaper-section p {
-            color: var(--gray);
+            color: var(--text-secondary);
             line-height: 1.8;
             font-size: 1.1rem;
             margin-bottom: 15px;
+            font-family: 'Comic Neue', sans-serif;
         }
 
         .whitepaper-section ul {
@@ -1079,20 +1372,25 @@
         }
 
         .roadmap-item {
-            background: 
-                linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(50, 205, 50, 0.1) 100%),
-                linear-gradient(135deg, rgba(255, 215, 0, 0.5), rgba(50, 205, 50, 0.5), rgba(255, 165, 0, 0.5));
-            background-clip: padding-box, border-box;
-            background-origin: padding-box, border-box;
+            background: var(--bg-card);
             padding: 30px;
-            border: 3px solid transparent;
-            border-radius: 20px;
+            border: 4px solid var(--border);
+            border-radius: 25px;
             text-align: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.2),
+                0 8px 25px rgba(255, 215, 0, 0.2);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            transform: rotate(1deg);
+        }
+
+        [data-theme="light"] .roadmap-item {
+            background: #FFFFFF;
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.3),
+                0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
         .roadmap-item::before {
@@ -1118,12 +1416,12 @@
         }
 
         .roadmap-item:hover {
-            background: 
-                linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(50, 205, 50, 0.15) 100%),
-                linear-gradient(135deg, rgba(255, 215, 0, 1), rgba(50, 205, 50, 1), rgba(255, 165, 0, 1));
-            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4),
-                        0 0 20px rgba(255, 215, 0, 0.3),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(50, 205, 50, 0.25) 100%);
+            border-color: var(--primary);
+            box-shadow: 
+                10px 10px 0px rgba(0, 0, 0, 0.4),
+                0 15px 40px rgba(255, 215, 0, 0.4);
+            transform: rotate(-1deg) translateY(-5px) scale(1.03);
         }
 
         .roadmap-item::before {
@@ -1154,33 +1452,265 @@
         .roadmap-icon {
             font-size: 3rem;
             margin-bottom: 15px;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.3)) drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+            animation: iconBounce 3s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        .roadmap-item:hover .roadmap-icon {
+            transform: scale(1.2) rotate(10deg);
+            animation: none;
         }
 
         .roadmap-item h4 {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             color: var(--primary);
             margin-bottom: 15px;
-            font-family: 'Rajdhani', sans-serif;
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
             font-weight: 700;
             letter-spacing: 1px;
+            text-shadow: 2px 2px 0px var(--border);
+            transform: rotate(-0.5deg);
         }
 
         .roadmap-item p {
-            color: var(--gray);
+            color: var(--text-secondary);
             font-size: 0.95rem;
-            line-height: 1.6;
+            line-height: 1.7;
             margin: 0;
+            font-family: 'Comic Neue', sans-serif;
+        }
+
+        /* Mini Games Section */
+        .minigames {
+            padding: 100px 20px;
+            background: linear-gradient(180deg, rgba(26, 46, 26, 0.85) 0%, rgba(15, 30, 15, 0.9) 100%);
+            position: relative;
+        }
+
+        [data-theme="light"] .minigames {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8F8F8 100%);
+        }
+
+        .minigames-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .minigames-card {
+            background: var(--bg-card);
+            padding: 50px 40px;
+            border-radius: 30px;
+            border: 4px solid var(--border);
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 
+                8px 8px 0px rgba(0, 0, 0, 0.2),
+                0 8px 32px rgba(0, 0, 0, 0.15);
+            transform: rotate(-1deg);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        [data-theme="light"] .minigames-card {
+            background: #FFFFFF;
+            box-shadow: 
+                8px 8px 0px rgba(0, 0, 0, 0.3),
+                0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .minigames-card:hover {
+            transform: rotate(1deg) translateY(-5px) scale(1.02);
+            box-shadow: 
+                12px 12px 0px rgba(0, 0, 0, 0.3),
+                0 15px 40px rgba(255, 215, 0, 0.3);
+        }
+
+        .minigames-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: iconBounce 3s ease-in-out infinite;
+            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.3));
+        }
+
+        .minigames-card h3 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-family: 'Fredoka', 'Bungee', sans-serif;
+            font-weight: 700;
+            text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3);
+            transform: rotate(0.5deg);
+        }
+
+        .minigames-card p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            line-height: 1.8;
+            font-family: 'Comic Neue', sans-serif;
+            margin-bottom: 25px;
+        }
+
+        .development-badge {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--gradient-primary);
+            color: var(--darker);
+            border-radius: 25px;
+            border: 3px solid var(--border);
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 
+                4px 4px 0px rgba(0, 0, 0, 0.3),
+                0 4px 15px rgba(255, 215, 0, 0.3);
+            transform: rotate(-1deg);
+            animation: comicFloat 4s ease-in-out infinite;
+        }
+
+        .minigames-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .minigames-feature {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 25px;
+            border: 4px solid var(--border);
+            text-align: center;
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.2),
+                0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: rotate(1deg);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        [data-theme="light"] .minigames-feature {
+            background: #FFFFFF;
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.3),
+                0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .minigames-feature:hover {
+            transform: rotate(-1deg) translateY(-5px) scale(1.03);
+            box-shadow: 
+                10px 10px 0px rgba(0, 0, 0, 0.3),
+                0 15px 35px rgba(255, 215, 0, 0.2);
+        }
+
+        .minigames-feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.3));
+        }
+
+        .minigames-feature h4 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+            font-weight: 700;
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+        }
+
+        .minigames-feature p {
+            color: var(--text-secondary);
+            font-family: 'Comic Neue', sans-serif;
+            font-size: 1rem;
+        }
+
+        /* Burn Section */
+        .burn-section {
+            padding: 100px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(15, 30, 15, 0.9) 0%, rgba(26, 46, 26, 0.85) 100%);
+            position: relative;
+        }
+
+        [data-theme="light"] .burn-section {
+            background: linear-gradient(180deg, #F8F8F8 0%, #FFFFFF 100%);
+        }
+
+        .burn-content {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            padding: 50px 40px;
+            border-radius: 30px;
+            border: 4px solid var(--border);
+            box-shadow: 
+                8px 8px 0px rgba(0, 0, 0, 0.2),
+                0 8px 32px rgba(0, 0, 0, 0.15);
+            transform: rotate(-0.5deg);
+        }
+
+        [data-theme="light"] .burn-content {
+            background: #FFFFFF;
+            box-shadow: 
+                8px 8px 0px rgba(0, 0, 0, 0.3),
+                0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .burn-content p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            line-height: 1.8;
+            font-family: 'Comic Neue', sans-serif;
+            margin-bottom: 30px;
+        }
+
+        .burn-btn {
+            padding: 20px 40px;
+            border-radius: 25px;
+            border: 4px solid var(--border);
+            background: var(--gradient-primary);
+            color: var(--darker);
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 
+                6px 6px 0px rgba(0, 0, 0, 0.3),
+                0 6px 25px rgba(255, 215, 0, 0.3);
+            transform: rotate(-1deg);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .burn-btn:hover:not(:disabled) {
+            transform: rotate(2deg) translateY(-5px) scale(1.05);
+            box-shadow: 
+                10px 10px 0px rgba(0, 0, 0, 0.4),
+                0 10px 35px rgba(255, 215, 0, 0.5);
+        }
+
+        .burn-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: rotate(0deg);
+        }
+
+        .burn-note {
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-style: italic;
         }
 
         /* Footer */
         footer {
             padding: 60px 20px;
             text-align: center;
-            background: linear-gradient(180deg, rgba(15, 30, 15, 0.98) 0%, var(--darker) 100%);
-            border-top: 3px solid;
-            border-image: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent), var(--primary)) 1;
+            background: linear-gradient(180deg, rgba(15, 30, 15, 0.9) 0%, var(--darker) 100%);
+            border-top: 4px solid var(--border);
             position: relative;
+        }
+
+        [data-theme="light"] footer {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F5F5F5 100%);
         }
 
         footer::before {
@@ -1203,19 +1733,20 @@
 
         .social-link {
             color: var(--primary);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             text-decoration: none;
-            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
-            background: rgba(255, 215, 0, 0.1);
+            filter: drop-shadow(3px 3px 0px rgba(0, 0, 0, 0.3));
+            background: rgba(255, 215, 0, 0.15);
             border-radius: 50%;
-            border: 2px solid rgba(255, 215, 0, 0.3);
+            border: 3px solid var(--border);
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            transform: rotate(-2deg);
         }
 
         .social-link svg {
@@ -1247,8 +1778,8 @@
         }
 
         .social-link:hover {
-            transform: translateY(-3px) scale(1.1);
-            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+            transform: rotate(5deg) translateY(-5px) scale(1.15);
+            filter: drop-shadow(5px 5px 0px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
             border-color: var(--primary);
         }
 
@@ -1285,31 +1816,116 @@
         /* Responsive */
         @media (max-width: 768px) {
             .hero {
-                padding: 80px 20px;
+                padding: 60px 15px;
                 min-height: 70vh;
+            }
+
+            .hero h1 {
+                font-size: clamp(2rem, 8vw, 4rem);
+                transform: rotate(0deg);
+            }
+
+            .hero h1::before,
+            .hero h1::after {
+                display: none;
+            }
+
+            .tagline {
+                font-size: clamp(1.1rem, 4vw, 1.6rem);
+                transform: rotate(0deg);
             }
 
             .hero-buttons {
                 flex-direction: column;
                 align-items: center;
+                gap: 15px;
             }
 
             .btn {
                 width: 100%;
-                max-width: 300px;
+                max-width: 280px;
+                transform: rotate(0deg);
+                font-size: 1rem;
+                padding: 16px 28px;
+            }
+
+            .btn:hover {
+                transform: rotate(1deg) translateY(-3px) scale(1.03);
             }
 
             .features-grid {
                 grid-template-columns: 1fr;
+                gap: 25px;
+            }
+
+            .feature-card {
+                transform: rotate(0deg);
+                padding: 30px 20px;
+            }
+
+            .feature-card:hover {
+                transform: rotate(1deg) translateY(-8px) scale(1.02);
             }
 
             .tokenomics-content {
                 padding: 30px 20px;
             }
 
+            .tokenomics-item {
+                transform: rotate(0deg);
+                padding: 25px 20px;
+            }
+
+            .tokenomics-item:hover {
+                transform: rotate(0.5deg) translateX(3px) scale(1.02);
+            }
+
+            .section-title {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+                transform: rotate(0deg);
+            }
+
+            .roadmap-item {
+                transform: rotate(0deg);
+            }
+
+            .roadmap-item:hover {
+                transform: rotate(0deg) translateY(-5px) scale(1.02);
+            }
+
             nav {
                 flex-direction: column;
-                gap: 20px;
+                gap: 15px;
+            }
+
+            .hero-contract {
+                padding: 20px 15px;
+                margin: 0 auto 20px;
+            }
+
+            .contract-wrapper {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .contract-address {
+                width: 100%;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .feature-card h3,
+            .tokenomics-item h3 {
+                font-size: 1.4rem;
             }
         }
 
@@ -1362,6 +1978,9 @@
                 <img src="logo.png" alt="MewVolt Logo" width="80" height="80">
             </div>
             <div class="nav-links">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle Dark/Light Mode">
+                    <span id="themeIcon">🌙</span>
+                </button>
                 <div class="language-selector">
                     <button class="language-btn" id="languageBtn" aria-label="Select language" aria-expanded="false" aria-haspopup="true">
                         🌐 <span id="currentLang">EN</span>
@@ -1536,6 +2155,50 @@
         </div>
     </section>
 
+    <section class="minigames" id="minigames">
+        <div class="container">
+            <h2 class="section-title" data-i18n="minigamesTitle">🎮 Mini Games</h2>
+            <div class="minigames-content">
+                <div class="minigames-card">
+                    <div class="minigames-icon">🚧</div>
+                    <h3 data-i18n="minigamesComing">Coming Soon!</h3>
+                    <p data-i18n="minigamesDesc">Our mini games section is currently under development. Get ready for exciting interactive games where you can earn rewards and have fun with the MewVolt community!</p>
+                    <div class="development-badge" data-i18n="underDevelopment">Under Development</div>
+                </div>
+                <div class="minigames-features">
+                    <div class="minigames-feature">
+                        <div class="minigames-feature-icon">🎰</div>
+                        <h4 data-i18n="minigamesSpinner">Spinner Games</h4>
+                        <p data-i18n="minigamesSpinnerDesc">Spin to win NFTs and tokens!</p>
+                    </div>
+                    <div class="minigames-feature">
+                        <div class="minigames-feature-icon">🏆</div>
+                        <h4 data-i18n="minigamesRewards">Rewards System</h4>
+                        <p data-i18n="minigamesRewardsDesc">Earn rewards by playing!</p>
+                    </div>
+                    <div class="minigames-feature">
+                        <div class="minigames-feature-icon">👥</div>
+                        <h4 data-i18n="minigamesCommunity">Community Events</h4>
+                        <p data-i18n="minigamesCommunityDesc">Compete with friends!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="burn-section" id="burn">
+        <div class="container">
+            <h2 class="section-title" data-i18n="burnTitle">🔥 Burn Tokens</h2>
+            <div class="burn-content">
+                <p data-i18n="burnDesc">Help reduce the total supply by burning your MewVolt tokens. Connect your Phantom wallet to get started.</p>
+                <button class="burn-btn" id="burnBtn" disabled data-i18n="burnButton">
+                    🔥 Burn Tokens (Coming Soon)
+                </button>
+                <p class="burn-note" data-i18n="burnNote">This feature will be available soon. Connect your Phantom wallet to burn tokens directly.</p>
+            </div>
+        </div>
+    </section>
+
     <footer>
         <div class="container">
             <p data-i18n="copyright">&copy; 2026 MewVolt. All rights reserved.</p>
@@ -1551,9 +2214,14 @@
                     </svg>
                 </a>
             </div>
-            <p style="margin-top: 20px; color: rgba(255, 255, 255, 0.6);" data-i18n="poweredBy">
+            <p style="margin-top: 20px; color: var(--text-secondary);" data-i18n="poweredBy">
                 ⚡ Powered by Electric Energy ⚡
             </p>
+            <div class="disclaimer" style="margin-top: 40px; padding: 25px; background: var(--bg-card); border-radius: 20px; border: 3px solid var(--border); max-width: 900px; margin-left: auto; margin-right: auto;">
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; font-family: 'Comic Neue', sans-serif;" data-i18n="disclaimer">
+                    <strong data-i18n="disclaimerTitle">⚠️ Disclaimer:</strong> MewVolt is not financial advice. Cryptocurrency investments carry significant risk. Always do your own research (DYOR) and only invest what you can afford to lose. MewVolt is a memecoin and should be treated as such. Past performance does not guarantee future results.
+                </p>
+            </div>
         </div>
     </footer>
 
@@ -1625,7 +2293,23 @@
                 wpPhilosophyTitle: "🔮 Filosofia de Longo Prazo",
                 wpPhilosophyDesc: "MewVolt não é um projeto de curto prazo. O foco está em construir um ecossistema sustentável que evolua e cresça com o tempo, sempre guiado pelos valores da comunidade e pela transparência total. Cada novo desenvolvimento será discutido e aprovado pela comunidade antes da implementação.",
                 wpTransparencyTitle: "⚡ Transparência e Governança",
-                wpTransparencyDesc: "Todas as decisões importantes serão tomadas através de discussões comunitárias abertas. O desenvolvimento seguirá um modelo transparente onde cada membro tem voz e pode contribuir para o futuro do projeto."
+                wpTransparencyDesc: "Todas as decisões importantes serão tomadas através de discussões comunitárias abertas. O desenvolvimento seguirá um modelo transparente onde cada membro tem voz e pode contribuir para o futuro do projeto.",
+                minigamesTitle: "🎮 Mini Games",
+                minigamesComing: "Em Breve!",
+                minigamesDesc: "Nossa seção de mini games está atualmente em desenvolvimento. Prepare-se para jogos interativos emocionantes onde você pode ganhar recompensas e se divertir com a comunidade MewVolt!",
+                underDevelopment: "Em Desenvolvimento",
+                minigamesSpinner: "Jogos de Spinner",
+                minigamesSpinnerDesc: "Gire para ganhar NFTs e tokens!",
+                minigamesRewards: "Sistema de Recompensas",
+                minigamesRewardsDesc: "Ganhe recompensas jogando!",
+                minigamesCommunity: "Eventos da Comunidade",
+                minigamesCommunityDesc: "Compita com amigos!",
+                burnTitle: "🔥 Queimar Tokens",
+                burnDesc: "Ajude a reduzir a oferta total queimando seus tokens MewVolt. Conecte sua carteira Phantom para começar.",
+                burnButton: "🔥 Queimar Tokens (Em Breve)",
+                burnNote: "Este recurso estará disponível em breve. Conecte sua carteira Phantom para queimar tokens diretamente.",
+                disclaimer: "<strong data-i18n=\"disclaimerTitle\">⚠️ Aviso Legal:</strong> MewVolt não é um conselho financeiro. Investimentos em criptomoedas carregam riscos significativos. Sempre faça sua própria pesquisa (DYOR) e invista apenas o que pode perder. MewVolt é um memecoin e deve ser tratado como tal. O desempenho passado não garante resultados futuros.",
+                disclaimerTitle: "⚠️ Aviso Legal:"
             },
             en: {
                 tagline: "The Electric Memecoin Powered by Community",
@@ -1692,7 +2376,23 @@
                 wpPhilosophyTitle: "🔮 Long-Term Philosophy",
                 wpPhilosophyDesc: "MewVolt is not a short-term project. The focus is on building a sustainable ecosystem that evolves and grows over time, always guided by community values and total transparency. Each new development will be discussed and approved by the community before implementation.",
                 wpTransparencyTitle: "⚡ Transparency and Governance",
-                wpTransparencyDesc: "All important decisions will be made through open community discussions. Development will follow a transparent model where each member has a voice and can contribute to the project's future."
+                wpTransparencyDesc: "All important decisions will be made through open community discussions. Development will follow a transparent model where each member has a voice and can contribute to the project's future.",
+                minigamesTitle: "🎮 Mini Games",
+                minigamesComing: "Coming Soon!",
+                minigamesDesc: "Our mini games section is currently under development. Get ready for exciting interactive games where you can earn rewards and have fun with the MewVolt community!",
+                underDevelopment: "Under Development",
+                minigamesSpinner: "Spinner Games",
+                minigamesSpinnerDesc: "Spin to win NFTs and tokens!",
+                minigamesRewards: "Rewards System",
+                minigamesRewardsDesc: "Earn rewards by playing!",
+                minigamesCommunity: "Community Events",
+                minigamesCommunityDesc: "Compete with friends!",
+                burnTitle: "🔥 Burn Tokens",
+                burnDesc: "Help reduce the total supply by burning your MewVolt tokens. Connect your Phantom wallet to get started.",
+                burnButton: "🔥 Burn Tokens (Coming Soon)",
+                burnNote: "This feature will be available soon. Connect your Phantom wallet to burn tokens directly.",
+                disclaimer: "<strong data-i18n=\"disclaimerTitle\">⚠️ Disclaimer:</strong> MewVolt is not financial advice. Cryptocurrency investments carry significant risk. Always do your own research (DYOR) and only invest what you can afford to lose. MewVolt is a memecoin and should be treated as such. Past performance does not guarantee future results.",
+                disclaimerTitle: "⚠️ Disclaimer:"
             },
             es: {
                 tagline: "El Memecoin Eléctrico Impulsado por la Comunidad",
@@ -1759,7 +2459,23 @@
                 wpPhilosophyTitle: "🔮 Filosofía de Largo Plazo",
                 wpPhilosophyDesc: "MewVolt no es un proyecto de corto plazo. El enfoque está en construir un ecosistema sostenible que evolucione y crezca con el tiempo, siempre guiado por los valores de la comunidad y la transparencia total. Cada nuevo desarrollo será discutido y aprobado por la comunidad antes de la implementación.",
                 wpTransparencyTitle: "⚡ Transparencia y Gobernanza",
-                wpTransparencyDesc: "Todas las decisiones importantes serán tomadas a través de discusiones comunitarias abiertas. El desarrollo seguirá un modelo transparente donde cada miembro tiene voz y puede contribuir al futuro del proyecto."
+                wpTransparencyDesc: "Todas las decisiones importantes serán tomadas a través de discusiones comunitarias abiertas. El desarrollo seguirá un modelo transparente donde cada miembro tiene voz y puede contribuir al futuro del proyecto.",
+                minigamesTitle: "🎮 Mini Juegos",
+                minigamesComing: "¡Próximamente!",
+                minigamesDesc: "Nuestra sección de mini juegos está actualmente en desarrollo. ¡Prepárate para juegos interactivos emocionantes donde puedes ganar recompensas y divertirte con la comunidad MewVolt!",
+                underDevelopment: "En Desarrollo",
+                minigamesSpinner: "Juegos de Spinner",
+                minigamesSpinnerDesc: "¡Gira para ganar NFTs y tokens!",
+                minigamesRewards: "Sistema de Recompensas",
+                minigamesRewardsDesc: "¡Gana recompensas jugando!",
+                minigamesCommunity: "Eventos de la Comunidad",
+                minigamesCommunityDesc: "¡Compite con amigos!",
+                burnTitle: "🔥 Quemar Tokens",
+                burnDesc: "Ayuda a reducir la oferta total quemando tus tokens MewVolt. Conecta tu billetera Phantom para comenzar.",
+                burnButton: "🔥 Quemar Tokens (Próximamente)",
+                burnNote: "Esta función estará disponible pronto. Conecta tu billetera Phantom para quemar tokens directamente.",
+                disclaimer: "<strong data-i18n=\"disclaimerTitle\">⚠️ Descargo de Responsabilidad:</strong> MewVolt no es un consejo financiero. Las inversiones en criptomonedas conllevan riesgos significativos. Siempre haz tu propia investigación (DYOR) e invierte solo lo que puedes permitirte perder. MewVolt es un memecoin y debe ser tratado como tal. El rendimiento pasado no garantiza resultados futuros.",
+                disclaimerTitle: "⚠️ Descargo de Responsabilidad:"
             }
         };
 
@@ -1837,6 +2553,46 @@
 
         // Initialize language on page load
         setLanguage(currentLanguage);
+
+        // Theme Toggle Functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+
+        // Get saved theme or default to dark
+        let currentTheme = localStorage.getItem('theme') || 'dark';
+        
+        function setTheme(theme) {
+            currentTheme = theme;
+            localStorage.setItem('theme', theme);
+            
+            if (theme === 'light') {
+                html.setAttribute('data-theme', 'light');
+                themeIcon.textContent = '☀️';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = '🌙';
+            }
+        }
+
+        // Initialize theme
+        setTheme(currentTheme);
+
+        // Toggle theme on button click
+        themeToggle.addEventListener('click', () => {
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        // Burn Button (disabled for now)
+        const burnBtn = document.getElementById('burnBtn');
+        if (burnBtn) {
+            burnBtn.addEventListener('click', () => {
+                // This will be implemented when the contract is ready
+                // For now, show a message
+                alert('Burn feature coming soon! This will allow you to burn tokens directly from your Phantom wallet.');
+            });
+        }
 
         // Copy contract address functionality
         const copyBtn = document.getElementById('copyBtn');
@@ -1937,4 +2693,3 @@
 </body>
 
 </html>
-

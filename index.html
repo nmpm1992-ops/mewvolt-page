@@ -26,6 +26,143 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;600;700&family=Fredoka:wght@400;500;600;700&family=Comic+Neue:wght@400;700&family=Bungee&display=swap" rel="stylesheet">
+        <!-- Solana Web3.js and SPL Token libraries -->
+        <!--
+            IMPORTANT: @solana/spl-token@0.3.9 does NOT ship an IIFE bundle on unpkg.
+            Loading it via <script src=".../lib/index.iife.min.js"> will fail and break wallet features.
+            We load both libraries via ESM (esm.sh) and then expose them on window.
+        -->
+    <script>
+        // Function to check and expose Solana libraries
+        window.checkSolanaLibraries = function() {
+            // The unpkg IIFE bundles expose libraries differently
+            // Check all possible locations on window object
+            const possibleWeb3Names = [
+                'solanaWeb3',
+                'SolanaWeb3', 
+                'web3',
+                'solana'
+            ];
+            
+            const possibleSplNames = [
+                'solanaSplToken',
+                'SolanaSplToken',
+                'splToken',
+                'SPLToken'
+            ];
+            
+            // Try to find web3.js - check all window properties
+            if (!window.SolanaWeb3) {
+                // First check known names
+                for (let name of possibleWeb3Names) {
+                    if (window[name] && window[name].Connection && window[name].PublicKey) {
+                        window.SolanaWeb3 = window[name];
+                        console.log('✅ Found Solana Web3.js as:', name);
+                        break;
+                    }
+                }
+                
+                // If still not found, search all window properties
+                if (!window.SolanaWeb3) {
+                    for (let key in window) {
+                        try {
+                            if (key.toLowerCase().includes('solana') || key.toLowerCase().includes('web3')) {
+                                const obj = window[key];
+                                if (obj && typeof obj === 'object' && obj.Connection && obj.PublicKey && obj.Transaction) {
+                                    window.SolanaWeb3 = obj;
+                                    console.log('✅ Found Solana Web3.js as:', key);
+                                    break;
+                                }
+                            }
+                        } catch(e) {
+                            // Skip if property access fails
+                        }
+                    }
+                }
+            }
+            
+            // Try to find spl-token
+            if (!window.SolanaSplToken) {
+                for (let name of possibleSplNames) {
+                    if (window[name] && (window[name].createBurnInstruction || window[name].TOKEN_PROGRAM_ID)) {
+                        window.SolanaSplToken = window[name];
+                        console.log('✅ Found Solana SPL Token as:', name);
+                        break;
+                    }
+                }
+                
+                // If still not found, search all window properties
+                if (!window.SolanaSplToken) {
+                    for (let key in window) {
+                        try {
+                            if (key.toLowerCase().includes('spl') || key.toLowerCase().includes('token')) {
+                                const obj = window[key];
+                                if (obj && typeof obj === 'object' && (obj.createBurnInstruction || obj.TOKEN_PROGRAM_ID)) {
+                                    window.SolanaSplToken = obj;
+                                    console.log('✅ Found Solana SPL Token as:', key);
+                                    break;
+                                }
+                            }
+                        } catch(e) {
+                            // Skip if property access fails
+                        }
+                    }
+                }
+            }
+            
+            // Log current state
+            const phantomProvider = (window.phantom && window.phantom.solana) ? window.phantom.solana : window.solana;
+            console.log('Library check:', {
+                web3: !!window.SolanaWeb3,
+                splToken: !!window.SolanaSplToken,
+                phantom: !!(phantomProvider && phantomProvider.isPhantom)
+            });
+            
+            // Dispatch custom event when ready
+            if (window.SolanaWeb3 && window.SolanaSplToken) {
+                window.dispatchEvent(new CustomEvent('solanaLibrariesReady'));
+                console.log('✅✅ Solana libraries are ready');
+            } else {
+                console.warn('⚠️ Libraries not fully loaded yet:', {
+                    hasWeb3: !!window.SolanaWeb3,
+                    hasSplToken: !!window.SolanaSplToken
+                });
+            }
+        };
+        
+        // Check after scripts load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(window.checkSolanaLibraries, 100);
+            });
+        } else {
+            setTimeout(window.checkSolanaLibraries, 100);
+        }
+    </script>
+
+    <script type="module">
+        try {
+            const [SolanaWeb3, SolanaSplToken] = await Promise.all([
+                import('https://esm.sh/@solana/web3.js@1.87.6'),
+                import('https://esm.sh/@solana/spl-token@0.3.9')
+            ]);
+
+            // Expose for the rest of the page (which expects window.SolanaWeb3 / window.SolanaSplToken)
+            window.SolanaWeb3 = SolanaWeb3;
+            window.SolanaSplToken = SolanaSplToken;
+
+            // Trigger existing readiness checks/event
+            if (window.checkSolanaLibraries) {
+                window.checkSolanaLibraries();
+            }
+        } catch (e) {
+            console.error('❌ Failed to load Solana libraries (ESM import):', e);
+            // Let the existing polling logic surface the "Libraries Failed to Load" state.
+        }
+    </script>
+
+    <!-- Jupiter Plugin (embedded swap UI) -->
+    <script src="https://plugin.jup.ag/plugin-v1.js" data-preload defer></script>
     <style>
         * {
             margin: 0;
@@ -1173,6 +1310,18 @@
                 width: 100%;
                 font-size: 0.75rem;
             }
+
+            .hero-action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .hero-action-buttons .pump-link,
+            .hero-action-buttons .burn-link,
+            .hero-action-buttons .buy-swap-link {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         .copy-btn {
@@ -1216,11 +1365,30 @@
             fill: var(--darker);
         }
 
-        .pump-link {
+        .hero-action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: nowrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .hero-action-buttons .burn-link,
+        .hero-action-buttons .buy-swap-link {
+            flex: 1 1 0;
+            min-width: 0;
+            justify-content: center;
+            min-height: 56px;
+        }
+
+        .pump-link,
+        .burn-link,
+        .buy-swap-link {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-top: 15px;
             padding: 12px 24px;
             background: var(--gradient-primary);
             color: var(--darker);
@@ -1236,16 +1404,38 @@
             transform: rotate(1deg);
         }
 
-        .pump-link:hover {
+        .pump-link:hover,
+        .burn-link:hover,
+        .buy-swap-link:hover {
             transform: rotate(-1deg) translateY(-4px) scale(1.08);
             box-shadow: 
                 6px 6px 0px rgba(0, 0, 0, 0.4),
                 0 8px 25px rgba(255, 215, 0, 0.5);
         }
 
+        .burn-link {
+            background: var(--gradient-accent);
+            transform: rotate(-1deg);
+        }
+
+        .burn-link:hover {
+            transform: rotate(1deg) translateY(-4px) scale(1.08);
+        }
+
         .pump-link::before {
             content: '🚀';
             font-size: 1.2rem;
+        }
+
+        .buy-swap-link {
+            cursor: pointer;
+        }
+
+        .hero-pump-full {
+            width: 100%;
+            justify-content: center;
+            margin-top: 12px;
+            min-height: 56px;
         }
 
         .highlight {
@@ -1713,6 +1903,224 @@
             font-style: italic;
         }
 
+        .wallet-connect-section {
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .wallet-btn {
+            padding: 15px 30px;
+            border-radius: 20px;
+            border: 3px solid var(--border);
+            background: var(--gradient-accent);
+            color: var(--darker);
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.3);
+            margin-right: 0;
+            min-width: 240px;
+            min-height: 56px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .wallet-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.4);
+        }
+
+        .wallet-status {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        .wallet-address {
+            font-family: monospace;
+            color: var(--primary);
+            word-break: break-all;
+            margin-top: 10px;
+        }
+
+        .burn-input-section {
+            margin: 30px 0;
+        }
+
+        .burn-input-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .burn-quick-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+
+        .burn-quick-btn {
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 3px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.25);
+        }
+
+        .burn-quick-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.35);
+        }
+
+        .burn-quick-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .burn-input {
+            padding: 15px 20px;
+            border-radius: 15px;
+            border: 3px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            font-family: 'Comic Neue', sans-serif;
+            font-size: 1.2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .burn-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .burn-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* Swap Modal */
+        .swap-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .swap-modal {
+            width: min(980px, 100%);
+            max-height: 90vh;
+            overflow: auto;
+            background: var(--bg-card);
+            border-radius: 30px;
+            border: 4px solid var(--border);
+            box-shadow:
+                10px 10px 0px rgba(0, 0, 0, 0.35),
+                0 18px 55px rgba(0, 0, 0, 0.4);
+        }
+
+        .swap-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 22px 22px 12px;
+            text-align: left;
+        }
+
+        .swap-modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .swap-modal-subtitle {
+            margin-top: 6px;
+            color: var(--text-secondary);
+            font-family: 'Comic Neue', sans-serif;
+            font-size: 1rem;
+        }
+
+        .swap-modal-close {
+            padding: 10px 14px;
+            border-radius: 16px;
+            border: 3px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            font-family: 'Fredoka', 'Comic Neue', sans-serif;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .swap-modal-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.35);
+        }
+
+        .swap-modal-body {
+            padding: 0 22px 22px;
+        }
+
+        @media (max-width: 600px) {
+            .swap-modal-header {
+                padding: 18px 16px 10px;
+            }
+            .swap-modal-body {
+                padding: 0 16px 16px;
+            }
+        }
+
+        .error-message {
+            color: var(--accent);
+            background: rgba(255, 107, 157, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--accent);
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+
+        .success-message {
+            color: var(--success);
+            background: rgba(144, 238, 144, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--success);
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+
         /* Footer */
         footer {
             padding: 60px 20px;
@@ -2031,7 +2439,13 @@
                         </svg>
                     </button>
                 </div>
-                <a href="https://pump.fun/CpqA1pwX5SjU1SgufRwQ59knKGaDMEQ7MQBeu6mpump" target="_blank" rel="noopener noreferrer" class="pump-link" data-i18n="viewOnPump">View on Pump.fun</a>
+                <div class="hero-action-buttons">
+                    <a href="#burn" class="burn-link" data-i18n="burnButtonHero">
+                        🔥 Burn Tokens
+                    </a>
+                    <button type="button" class="buy-swap-link" id="openSwapModalHeroAction" data-i18n="buySwap">🔁 Buy / Swap</button>
+                </div>
+                <a href="https://pump.fun/CpqA1pwX5SjU1SgufRwQ59knKGaDMEQ7MQBeu6mpump" target="_blank" rel="noopener noreferrer" class="pump-link hero-pump-full" data-i18n="viewOnPump">View on Pump.fun</a>
             </div>
             <h1>⚡ MewVolt</h1>
             <p class="tagline" data-i18n="tagline">O Memecoin Elétrico Alimentado pela Comunidade</p>
@@ -2204,13 +2618,68 @@
             <h2 class="section-title" data-i18n="burnTitle">🔥 Burn Tokens</h2>
             <div class="burn-content">
                 <p data-i18n="burnDesc">Help reduce the total supply by burning your MewVolt tokens. Connect your Phantom wallet to get started.</p>
-                <button class="burn-btn" id="burnBtn" disabled data-i18n="burnButton">
-                    🔥 Burn Tokens (Coming Soon)
-                </button>
-                <p class="burn-note" data-i18n="burnNote">This feature will be available soon. Connect your Phantom wallet to burn tokens directly.</p>
+                
+                <div class="wallet-connect-section">
+                    <button class="wallet-btn" id="connectWalletBtn">
+                        🔌 Connect Phantom Wallet
+                    </button>
+                    <button class="wallet-btn" id="disconnectWalletBtn" style="display: none;">
+                        🔓 Disconnect Wallet
+                    </button>
+                    <button class="wallet-btn" id="openSwapModalBurn" type="button" data-i18n="swapSolToMewvolt">🔁 Swap SOL → MewVolt</button>
+                    <div class="wallet-status" id="walletStatus" style="display: none;">
+                        <strong>✅ Wallet Connected:</strong>
+                        <div class="wallet-address" id="walletAddress"></div>
+                    </div>
+                </div>
+
+                <div class="burn-input-section" id="burnInputSection" style="display: none;">
+                    <div class="burn-input-wrapper">
+                        <label for="burnAmount" style="font-weight: 600; font-size: 1.1rem;">
+                            Amount to Burn:
+                        </label>
+                        <input 
+                            type="number" 
+                            id="burnAmount" 
+                            class="burn-input" 
+                            placeholder="Enter amount"
+                            min="0"
+                            step="0.000001"
+                        >
+                        <div class="burn-quick-buttons" aria-label="Quick burn amount">
+                            <button type="button" class="burn-quick-btn" data-burn-percent="25">25%</button>
+                            <button type="button" class="burn-quick-btn" data-burn-percent="50">50%</button>
+                            <button type="button" class="burn-quick-btn" data-burn-percent="75">75%</button>
+                            <button type="button" class="burn-quick-btn" data-burn-percent="100">100%</button>
+                        </div>
+                        <p class="burn-info" id="tokenBalance">Loading balance...</p>
+                    </div>
+                    <button class="burn-btn" id="burnBtn" data-i18n="burnButton">
+                        🔥 Burn Tokens
+                    </button>
+                    <div id="burnMessages"></div>
+                </div>
+
+                <p class="burn-note" data-i18n="burnNote">Connect your Phantom wallet and enter the amount of tokens you want to burn. This action is irreversible.</p>
             </div>
         </div>
     </section>
+
+    <!-- Swap Modal (Jupiter Plugin inside) -->
+    <div class="swap-modal-overlay" id="swapModal" role="dialog" aria-modal="true" aria-labelledby="swapModalTitle" style="display: none;">
+        <div class="swap-modal" role="document">
+            <div class="swap-modal-header">
+                <div>
+                    <div class="swap-modal-title" id="swapModalTitle" data-i18n="swapEmbedTitle">🔁 Swap SOL → MewVolt</div>
+                    <div class="swap-modal-subtitle" data-i18n="swapEmbedDesc">Swap directly on this page using Jupiter.</div>
+                </div>
+                <button type="button" class="swap-modal-close" id="swapModalCloseBtn" aria-label="Close">✕</button>
+            </div>
+            <div class="swap-modal-body">
+                <div id="jupiter-plugin" style="min-height: 560px;"></div>
+            </div>
+        </div>
+    </div>
 
     <footer>
         <div class="container">
@@ -2320,6 +2789,11 @@
                 burnTitle: "🔥 Queimar Tokens",
                 burnDesc: "Ajude a reduzir a oferta total queimando seus tokens MewVolt. Conecte sua carteira Phantom para começar.",
                 burnButton: "🔥 Queimar Tokens (Em Breve)",
+                burnButtonHero: "🔥 Queimar Tokens",
+                swapSolToMewvolt: "🔁 Trocar SOL → MewVolt",
+                buySwap: "🔁 Comprar / Trocar",
+                swapEmbedTitle: "🔁 Trocar SOL → MewVolt",
+                swapEmbedDesc: "Troque diretamente nesta página usando Jupiter.",
                 burnNote: "Este recurso estará disponível em breve. Conecte sua carteira Phantom para queimar tokens diretamente.",
                 disclaimer: "<strong data-i18n=\"disclaimerTitle\">⚠️ Aviso Legal:</strong> MewVolt não é um conselho financeiro. Investimentos em criptomoedas carregam riscos significativos. Sempre faça sua própria pesquisa (DYOR) e invista apenas o que pode perder. MewVolt é um memecoin e deve ser tratado como tal. O desempenho passado não garante resultados futuros.",
                 disclaimerTitle: "⚠️ Aviso Legal:"
@@ -2403,6 +2877,11 @@
                 burnTitle: "🔥 Burn Tokens",
                 burnDesc: "Help reduce the total supply by burning your MewVolt tokens. Connect your Phantom wallet to get started.",
                 burnButton: "🔥 Burn Tokens (Coming Soon)",
+                burnButtonHero: "🔥 Burn Tokens",
+                swapSolToMewvolt: "🔁 Swap SOL → MewVolt",
+                buySwap: "🔁 Buy / Swap",
+                swapEmbedTitle: "🔁 Swap SOL → MewVolt",
+                swapEmbedDesc: "Swap directly on this page using Jupiter.",
                 burnNote: "This feature will be available soon. Connect your Phantom wallet to burn tokens directly.",
                 disclaimer: "<strong data-i18n=\"disclaimerTitle\">⚠️ Disclaimer:</strong> MewVolt is not financial advice. Cryptocurrency investments carry significant risk. Always do your own research (DYOR) and only invest what you can afford to lose. MewVolt is a memecoin and should be treated as such. Past performance does not guarantee future results.",
                 disclaimerTitle: "⚠️ Disclaimer:"
@@ -2486,6 +2965,11 @@
                 burnTitle: "🔥 Quemar Tokens",
                 burnDesc: "Ayuda a reducir la oferta total quemando tus tokens MewVolt. Conecta tu billetera Phantom para comenzar.",
                 burnButton: "🔥 Quemar Tokens (Próximamente)",
+                burnButtonHero: "🔥 Quemar Tokens",
+                swapSolToMewvolt: "🔁 Cambiar SOL → MewVolt",
+                buySwap: "🔁 Comprar / Intercambiar",
+                swapEmbedTitle: "🔁 Cambiar SOL → MewVolt",
+                swapEmbedDesc: "Intercambia directamente en esta página usando Jupiter.",
                 burnNote: "Esta función estará disponible pronto. Conecta tu billetera Phantom para quemar tokens directamente.",
                 disclaimer: "<strong data-i18n=\"disclaimerTitle\">⚠️ Descargo de Responsabilidad:</strong> MewVolt no es un consejo financiero. Las inversiones en criptomonedas conllevan riesgos significativos. Siempre haz tu propia investigación (DYOR) e invierte solo lo que puedes permitirte perder. MewVolt es un memecoin y debe ser tratado como tal. El rendimiento pasado no garantiza resultados futuros.",
                 disclaimerTitle: "⚠️ Descargo de Responsabilidad:"
@@ -2597,15 +3081,698 @@
             setTheme(newTheme);
         });
 
-        // Burn Button (disabled for now)
+        // Phantom Wallet Connection and Token Burn Functionality
+        const TOKEN_MINT_ADDRESS = 'CpqA1pwX5SjU1SgufRwQ59knKGaDMEQ7MQBeu6mpump';
+        const SOL_MINT_ADDRESS = 'So11111111111111111111111111111111111111112';
+        // Public Solana RPCs can block browser traffic (CORS / rate limiting) and return JSON-RPC 403.
+        // Use a small fallback list of endpoints that generally work from the browser.
+        const SOLANA_RPC_ENDPOINTS = [
+            'https://solana-rpc.publicnode.com',
+            'https://rpc.ankr.com/solana',
+            'https://api.mainnet-beta.solana.com'
+        ];
+        let currentRpcEndpointIndex = 0;
+
+        let walletConnected = false;
+        let publicKey = null;
+        let connection = null;
+
+        // Balance state for UX + precise percent calculations
+        let tokenBalanceRaw = 0n; // smallest units (BigInt)
+        let tokenDecimals = 0;
+
+        // Phantom has historically injected `window.solana`, but newer builds also expose `window.phantom.solana`.
+        // Use a single getter so we always talk to the right provider.
+        function getPhantomProvider() {
+            const provider = (window.phantom && window.phantom.solana) ? window.phantom.solana : window.solana;
+            if (provider && provider.isPhantom) return provider;
+            return null;
+        }
+
+        // Check if Phantom wallet is installed
+        function isPhantomInstalled() {
+            return !!getPhantomProvider();
+        }
+
+        // Initialize Solana connection
+        function initSolana() {
+            if (window.SolanaWeb3 && window.SolanaSplToken) {
+                if (!connection) {
+                    connection = new window.SolanaWeb3.Connection(SOLANA_RPC_ENDPOINTS[currentRpcEndpointIndex], 'confirmed');
+                }
+                return true;
+            }
+            return false;
+        }
+
+        function setSolanaRpcEndpoint(index) {
+            const i = Math.max(0, Math.min(SOLANA_RPC_ENDPOINTS.length - 1, index));
+            currentRpcEndpointIndex = i;
+            if (window.SolanaWeb3) {
+                connection = new window.SolanaWeb3.Connection(SOLANA_RPC_ENDPOINTS[currentRpcEndpointIndex], 'confirmed');
+            } else {
+                connection = null;
+            }
+        }
+
+        async function ensureRpcHealthy() {
+            if (!initSolana() || !connection) return false;
+
+            // Try current endpoint, then failover through the list
+            for (let attempt = 0; attempt < SOLANA_RPC_ENDPOINTS.length; attempt++) {
+                try {
+                    await connection.getVersion();
+                    return true;
+                } catch (e) {
+                    const endpoint = SOLANA_RPC_ENDPOINTS[currentRpcEndpointIndex];
+                    console.warn('⚠️ Solana RPC failed, trying next:', endpoint, e);
+                    setSolanaRpcEndpoint((currentRpcEndpointIndex + 1) % SOLANA_RPC_ENDPOINTS.length);
+                }
+            }
+            return false;
+        }
+
+        // Update connect button based on availability
+        function updateConnectButtonState() {
+            const connectBtn = document.getElementById('connectWalletBtn');
+            if (!connectBtn) return;
+
+            const hasPhantom = isPhantomInstalled();
+            const hasLibraries = window.SolanaWeb3 && window.SolanaSplToken;
+
+            if (!hasPhantom) {
+                connectBtn.disabled = true;
+                connectBtn.textContent = '⚠️ Install Phantom Wallet';
+                connectBtn.title = 'Please install Phantom wallet from https://phantom.app';
+                return;
+            }
+
+            if (!hasLibraries) {
+                connectBtn.disabled = true;
+                connectBtn.textContent = '⏳ Loading Libraries...';
+                connectBtn.title = 'Waiting for Solana libraries to load';
+                return;
+            }
+
+            // Both available - enable button
+            connectBtn.disabled = false;
+            connectBtn.textContent = '🔌 Connect Phantom Wallet';
+            connectBtn.title = 'Connect your Phantom wallet';
+        }
+
+        // Wait for libraries to be ready
+        window.addEventListener('solanaLibrariesReady', () => {
+            initSolana();
+            updateConnectButtonState();
+        });
+
+        // Check on page load and periodically
+        function initializeWalletFeatures() {
+            updateConnectButtonState();
+            
+            // Check libraries multiple times (they might load asynchronously)
+            let attempts = 0;
+            const maxAttempts = 10;
+            const checkInterval = setInterval(() => {
+                attempts++;
+                if (window.checkSolanaLibraries) {
+                    window.checkSolanaLibraries();
+                }
+                updateConnectButtonState();
+                
+                // Stop checking if both are ready or max attempts reached
+                if ((window.SolanaWeb3 && window.SolanaSplToken) || attempts >= maxAttempts) {
+                    clearInterval(checkInterval);
+                    if (window.SolanaWeb3 && window.SolanaSplToken) {
+                        initSolana();
+                        console.log('✅ Solana features ready');
+                    } else {
+                        console.warn('⚠️ Solana libraries did not load properly');
+                        const connectBtn = document.getElementById('connectWalletBtn');
+                        if (connectBtn && connectBtn.disabled) {
+                            connectBtn.textContent = '⚠️ Libraries Failed to Load';
+                            connectBtn.title = 'Please refresh the page';
+                        }
+                    }
+                }
+            }, 500);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeWalletFeatures);
+        } else {
+            initializeWalletFeatures();
+        }
+
+        // Check if Phantom wallet is installed (for connection attempt)
+        function checkPhantomWallet() {
+            if (!isPhantomInstalled()) {
+                showMessage('Please install Phantom wallet to use this feature. Download at https://phantom.app', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        // Connect to Phantom wallet
+        const connectWalletBtn = document.getElementById('connectWalletBtn');
+        const disconnectWalletBtn = document.getElementById('disconnectWalletBtn');
+        const walletStatus = document.getElementById('walletStatus');
+        const walletAddress = document.getElementById('walletAddress');
+        const burnInputSection = document.getElementById('burnInputSection');
         const burnBtn = document.getElementById('burnBtn');
-        if (burnBtn) {
-            burnBtn.addEventListener('click', () => {
-                // This will be implemented when the contract is ready
-                // For now, show a message
-                alert('Burn feature coming soon! This will allow you to burn tokens directly from your Phantom wallet.');
+        const burnAmountInput = document.getElementById('burnAmount');
+        const tokenBalanceEl = document.getElementById('tokenBalance');
+        const quickBurnButtons = Array.from(document.querySelectorAll('.burn-quick-btn'));
+
+        // Swap modal triggers
+        const openSwapModalHeroBtn = document.getElementById('openSwapModalHero');
+        const openSwapModalHeroActionBtn = document.getElementById('openSwapModalHeroAction');
+        const openSwapModalBurnBtn = document.getElementById('openSwapModalBurn');
+        const swapModal = document.getElementById('swapModal');
+        const swapModalCloseBtn = document.getElementById('swapModalCloseBtn');
+
+        // Embedded Jupiter swap (official Plugin)
+        let jupiterPluginInitialized = false;
+        function initJupiterPlugin() {
+            if (jupiterPluginInitialized) return;
+            const target = document.getElementById('jupiter-plugin');
+            if (!target) return;
+            if (!window.Jupiter || typeof window.Jupiter.init !== 'function') return;
+
+            try {
+                window.Jupiter.init({
+                    displayMode: 'integrated',
+                    integratedTargetId: 'jupiter-plugin',
+                    formProps: {
+                        initialInputMint: SOL_MINT_ADDRESS,
+                        initialOutputMint: TOKEN_MINT_ADDRESS
+                    }
+                });
+                jupiterPluginInitialized = true;
+            } catch (e) {
+                console.error('❌ Failed to initialize Jupiter Plugin:', e);
+            }
+        }
+
+        function ensureJupiterPluginInitWithRetry() {
+            initJupiterPlugin();
+            if (jupiterPluginInitialized) return;
+            let attempts = 0;
+            const maxAttempts = 40; // ~10s
+            const t = setInterval(() => {
+                attempts++;
+                initJupiterPlugin();
+                if (jupiterPluginInitialized || attempts >= maxAttempts) {
+                    clearInterval(t);
+                }
+            }, 250);
+        }
+
+        function openSwapModal() {
+            if (!swapModal) return;
+            swapModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            // Let the modal become visible before initializing Plugin
+            setTimeout(() => {
+                ensureJupiterPluginInitWithRetry();
+            }, 50);
+        }
+
+        function closeSwapModal() {
+            if (!swapModal) return;
+            swapModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        if (openSwapModalHeroBtn) {
+            openSwapModalHeroBtn.addEventListener('click', openSwapModal);
+        }
+        if (openSwapModalHeroActionBtn) {
+            openSwapModalHeroActionBtn.addEventListener('click', openSwapModal);
+        }
+        if (openSwapModalBurnBtn) {
+            openSwapModalBurnBtn.addEventListener('click', openSwapModal);
+        }
+        if (swapModalCloseBtn) {
+            swapModalCloseBtn.addEventListener('click', closeSwapModal);
+        }
+        if (swapModal) {
+            swapModal.addEventListener('click', (e) => {
+                if (e.target === swapModal) {
+                    closeSwapModal();
+                }
             });
         }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeSwapModal();
+            }
+        });
+
+        function setBurnControlsEnabled(enabled) {
+            if (burnAmountInput) burnAmountInput.disabled = !enabled;
+            if (burnBtn) burnBtn.disabled = !enabled;
+            for (const btn of quickBurnButtons) {
+                btn.disabled = !enabled;
+            }
+        }
+
+        function rawToUiString(rawAmount, decimals) {
+            const raw = BigInt(rawAmount);
+            if (decimals <= 0) return raw.toString();
+
+            const sign = raw < 0n ? '-' : '';
+            const abs = raw < 0n ? -raw : raw;
+            const s = abs.toString();
+            const d = Number(decimals);
+            const padded = s.padStart(d + 1, '0');
+            const intPart = padded.slice(0, -d);
+            let fracPart = padded.slice(-d);
+            fracPart = fracPart.replace(/0+$/, '');
+            return fracPart ? `${sign}${intPart}.${fracPart}` : `${sign}${intPart}`;
+        }
+
+        function updateBurnUiFromBalance() {
+            const hasBalance = tokenBalanceRaw > 0n;
+            setBurnControlsEnabled(hasBalance);
+            if (!hasBalance && burnAmountInput) {
+                burnAmountInput.value = '';
+            }
+        }
+
+        if (connectWalletBtn) {
+            connectWalletBtn.addEventListener('click', async () => {
+                try {
+                    if (!checkPhantomWallet()) return;
+
+                    const provider = getPhantomProvider();
+                    if (!provider) {
+                        showMessage('Phantom provider not found. Please ensure Phantom is installed and enabled for this site.', 'error');
+                        return;
+                    }
+                    
+                    if (!initSolana()) {
+                        showMessage('Solana libraries are not loaded. Please refresh the page.', 'error');
+                        return;
+                    }
+
+                    // Connect to Phantom wallet
+                    const response = await provider.connect();
+                    
+                    // Initialize libraries if not already done
+                    if (!initSolana()) {
+                        showMessage('Solana libraries are not loaded. Please refresh the page.', 'error');
+                        return;
+                    }
+                    
+                    const connectedKey = (response && response.publicKey) ? response.publicKey : provider.publicKey;
+                    if (!connectedKey) {
+                        showMessage('Wallet connection did not return a public key.', 'error');
+                        return;
+                    }
+
+                    publicKey = new window.SolanaWeb3.PublicKey(connectedKey.toString());
+                    walletConnected = true;
+
+                    // Update UI
+                    connectWalletBtn.style.display = 'none';
+                    disconnectWalletBtn.style.display = 'inline-block';
+                    walletStatus.style.display = 'block';
+                    walletAddress.textContent = publicKey.toString();
+                    burnInputSection.style.display = 'block';
+
+                    // Load token balance
+                    await loadTokenBalance();
+
+                    // Enable/disable burn UI based on balance
+                    updateBurnUiFromBalance();
+
+                    showMessage('Wallet connected successfully!', 'success');
+                } catch (err) {
+                    console.error('Error connecting wallet:', err);
+                    const message = (err && err.message) ? err.message : String(err);
+                    showMessage('Failed to connect wallet: ' + message, 'error');
+                }
+            });
+        }
+
+        // Disconnect wallet
+        if (disconnectWalletBtn) {
+            disconnectWalletBtn.addEventListener('click', async () => {
+                try {
+                    const provider = getPhantomProvider();
+                    if (provider && provider.disconnect) {
+                        await provider.disconnect();
+                    }
+                    walletConnected = false;
+                    publicKey = null;
+
+                    // Update UI
+                    connectWalletBtn.style.display = 'inline-block';
+                    disconnectWalletBtn.style.display = 'none';
+                    walletStatus.style.display = 'none';
+                    burnInputSection.style.display = 'none';
+                    burnAmountInput.value = '';
+                    tokenBalanceRaw = 0n;
+                    tokenDecimals = 0;
+                    setBurnControlsEnabled(false);
+                    clearMessages();
+                } catch (err) {
+                    console.error('Error disconnecting wallet:', err);
+                }
+            });
+        }
+
+        // Quick percentage buttons
+        for (const btn of quickBurnButtons) {
+            btn.addEventListener('click', () => {
+                const pctAttr = btn.getAttribute('data-burn-percent');
+                const pct = pctAttr ? Number(pctAttr) : NaN;
+                if (!burnAmountInput || !Number.isFinite(pct)) return;
+                if (!walletConnected || tokenBalanceRaw <= 0n) return;
+
+                const p = BigInt(Math.max(0, Math.min(100, Math.trunc(pct))));
+                const rawAmount = (tokenBalanceRaw * p) / 100n;
+                burnAmountInput.value = rawToUiString(rawAmount, tokenDecimals);
+            });
+        }
+
+        // Load token balance
+        async function loadTokenBalance() {
+            if (!publicKey || !connection) return;
+
+            try {
+                if (!connection || !window.SolanaWeb3) {
+                    if (!initSolana()) {
+                        tokenBalanceEl.textContent = 'Unable to load balance - libraries not ready';
+                        return;
+                    }
+                }
+
+                if (!window.SolanaSplToken) {
+                    tokenBalanceEl.textContent = 'Unable to load balance - token library not ready';
+                    return;
+                }
+
+                const rpcOk = await ensureRpcHealthy();
+                if (!rpcOk) {
+                    tokenBalanceRaw = 0n;
+                    tokenDecimals = 0;
+                    tokenBalanceEl.textContent = 'Unable to load balance (RPC blocked)';
+                    setBurnControlsEnabled(false);
+                    return;
+                }
+                
+                const mintPublicKey = new window.SolanaWeb3.PublicKey(TOKEN_MINT_ADDRESS);
+
+                // Some mints (e.g. Token-2022) won't show up unless we query the right token program.
+                // We query both (legacy SPL Token + Token-2022 when available) and sum balances.
+                const { TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } = window.SolanaSplToken;
+                const programIds = [TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID].filter(Boolean);
+
+                let foundAny = false;
+                let decimals = 0;
+                let totalRaw = 0n;
+
+                for (const programId of programIds) {
+                    const resp = await connection.getParsedTokenAccountsByOwner(publicKey, { programId });
+                    for (const acc of resp.value) {
+                        const info = acc.account?.data?.parsed?.info;
+                        if (!info) continue;
+                        if (info.mint !== mintPublicKey.toString()) continue;
+
+                        const tokenAmount = info.tokenAmount;
+                        const rawStr = tokenAmount?.amount;
+                        const d = Number(tokenAmount?.decimals || 0);
+
+                        let raw = 0n;
+                        try {
+                            raw = BigInt(rawStr || '0');
+                        } catch {
+                            raw = 0n;
+                        }
+
+                        if (!foundAny) decimals = d;
+                        foundAny = true;
+                        totalRaw += raw;
+                    }
+                }
+
+                tokenDecimals = foundAny ? decimals : 0;
+                tokenBalanceRaw = foundAny ? totalRaw : 0n;
+
+                if (!foundAny || tokenBalanceRaw <= 0n) {
+                    tokenBalanceEl.textContent = 'Balance: 0 MewVolt tokens';
+                    updateBurnUiFromBalance();
+                    return;
+                }
+
+                tokenBalanceEl.textContent = `Balance: ${rawToUiString(tokenBalanceRaw, tokenDecimals)} MewVolt tokens`;
+                updateBurnUiFromBalance();
+            } catch (err) {
+                console.error('Error loading token balance:', err);
+                tokenBalanceRaw = 0n;
+                tokenDecimals = 0;
+                tokenBalanceEl.textContent = 'Unable to load balance';
+                setBurnControlsEnabled(false);
+            }
+        }
+
+        // Burn tokens
+        if (burnBtn) {
+            burnBtn.addEventListener('click', async () => {
+                let signature = null;
+                try {
+                    if (!walletConnected || !publicKey) {
+                        showMessage('Please connect your wallet first.', 'error');
+                        return;
+                    }
+
+                    const burnAmount = parseFloat(burnAmountInput.value);
+                    if (!burnAmount || burnAmount <= 0) {
+                        showMessage('Please enter a valid amount to burn.', 'error');
+                        return;
+                    }
+
+                    if (tokenBalanceRaw <= 0n) {
+                        showMessage('You have 0 MewVolt tokens to burn.', 'error');
+                        return;
+                    }
+
+                    if (!initSolana() || !connection || !window.SolanaWeb3 || !window.SolanaSplToken) {
+                        showMessage('Solana libraries not loaded. Please refresh the page and wait a moment.', 'error');
+                        return;
+                    }
+
+                    const rpcOk = await ensureRpcHealthy();
+                    if (!rpcOk) {
+                        showMessage('RPC access blocked (403). Please refresh and try again, or use a different network/RPC.', 'error');
+                        return;
+                    }
+
+                    burnBtn.disabled = true;
+                    burnBtn.textContent = '🔄 Burning...';
+
+                    const { PublicKey, Transaction } = window.SolanaWeb3;
+                    const { createBurnInstruction, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } = window.SolanaSplToken;
+
+                    // Get token account (supports both legacy SPL Token and Token-2022)
+                    const mintPublicKey = new PublicKey(TOKEN_MINT_ADDRESS);
+                    const programIds = [TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID].filter(Boolean);
+                    const matchingAccounts = [];
+
+                    for (const programId of programIds) {
+                        const resp = await connection.getParsedTokenAccountsByOwner(publicKey, { programId });
+                        for (const acc of resp.value) {
+                            const info = acc.account?.data?.parsed?.info;
+                            if (!info) continue;
+                            if (info.mint !== mintPublicKey.toString()) continue;
+                            matchingAccounts.push(acc);
+                        }
+                    }
+
+                    if (matchingAccounts.length === 0) {
+                        showMessage('No token account found. You may not have any tokens to burn.', 'error');
+                        burnBtn.disabled = false;
+                        burnBtn.textContent = '🔥 Burn Tokens';
+                        return;
+                    }
+
+                    // Prefer an account with a positive balance, otherwise just use the first match.
+                    let selected = matchingAccounts[0];
+                    for (const acc of matchingAccounts) {
+                        const amtStr = acc.account?.data?.parsed?.info?.tokenAmount?.amount;
+                        try {
+                            if (BigInt(amtStr || '0') > 0n) {
+                                selected = acc;
+                                break;
+                            }
+                        } catch {
+                            // ignore
+                        }
+                    }
+
+                    const tokenAccountAddress = new PublicKey(selected.pubkey);
+                    const decimals = Number(selected.account.data.parsed.info.tokenAmount.decimals || 0);
+                    const burnAmountInSmallestUnit = Math.floor(burnAmount * Math.pow(10, decimals));
+
+                    if (burnAmountInSmallestUnit <= 0) {
+                        showMessage('Please enter a valid amount to burn.', 'error');
+                        burnBtn.disabled = false;
+                        burnBtn.textContent = '🔥 Burn Tokens';
+                        return;
+                    }
+
+                    // Create burn instruction
+                    // Use the correct token program id (Token-2022 vs legacy SPL Token)
+                    const tokenProgramId = (selected.account.owner === (TOKEN_2022_PROGRAM_ID ? TOKEN_2022_PROGRAM_ID.toString() : ''))
+                        ? TOKEN_2022_PROGRAM_ID
+                        : TOKEN_PROGRAM_ID;
+                    const burnInstruction = createBurnInstruction(
+                        tokenAccountAddress,
+                        mintPublicKey,
+                        publicKey,
+                        burnAmountInSmallestUnit,
+                        [],
+                        tokenProgramId
+                    );
+
+                    // Get recent blockhash
+                    const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+
+                    // Create transaction
+                    const transaction = new Transaction().add(burnInstruction);
+                    transaction.feePayer = publicKey;
+                    transaction.recentBlockhash = latestBlockhash.blockhash;
+
+                    // Sign and send transaction
+                    const provider = getPhantomProvider();
+                    if (!provider) {
+                        showMessage('Phantom provider not found. Please reconnect your wallet.', 'error');
+                        return;
+                    }
+
+                    const signedTransaction = await provider.signTransaction(transaction);
+                    signature = await connection.sendRawTransaction(signedTransaction.serialize(), {
+                        skipPreflight: false,
+                        preflightCommitment: 'confirmed',
+                        maxRetries: 3
+                    });
+
+                    // Immediately show tx id (so user isn't stuck waiting for confirmations)
+                    showMessage(`📤 Transaction submitted: ${signature}`, 'success');
+
+                    // Confirm transaction
+                    const confirmPromise = connection.confirmTransaction(
+                        {
+                            signature,
+                            blockhash: latestBlockhash.blockhash,
+                            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
+                        },
+                        'confirmed'
+                    );
+
+                    // If confirmation is slow but the tx is real, don't show a scary error.
+                    const timeoutMs = 25000;
+                    await Promise.race([
+                        confirmPromise,
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('CONFIRM_TIMEOUT')), timeoutMs))
+                    ]);
+
+                    showMessage(`✅ Successfully burned ${burnAmount} MewVolt tokens! Transaction: ${signature}`, 'success');
+                    burnAmountInput.value = '';
+                    await loadTokenBalance(); // Refresh balance
+
+                } catch (err) {
+                    console.error('Error burning tokens:', err);
+
+                    // If the tx was submitted, confirmation might just be slow.
+                    const msg = (err && err.message) ? String(err.message) : 'Unknown error';
+                    if (signature && (msg.includes('timeout') || msg.includes('CONFIRM_TIMEOUT'))) {
+                        showMessage(`✅ Burn submitted (confirmation delayed). Transaction: ${signature}`, 'success');
+                        try {
+                            await loadTokenBalance();
+                        } catch {
+                            // ignore
+                        }
+                    } else {
+                        showMessage('Failed to burn tokens: ' + msg, 'error');
+                    }
+                } finally {
+                    burnBtn.disabled = false;
+                    burnBtn.textContent = '🔥 Burn Tokens';
+                }
+            });
+        }
+
+        // Show message function
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('burnMessages');
+            if (!messagesDiv) return;
+
+            const messageEl = document.createElement('div');
+            messageEl.className = type === 'error' ? 'error-message' : 'success-message';
+            messageEl.textContent = message;
+            messagesDiv.innerHTML = '';
+            messagesDiv.appendChild(messageEl);
+
+            // Auto-remove success messages after 10 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageEl.remove();
+                }, 10000);
+            }
+        }
+
+        // Clear messages
+        function clearMessages() {
+            const messagesDiv = document.getElementById('burnMessages');
+            if (messagesDiv) {
+                messagesDiv.innerHTML = '';
+            }
+        }
+
+        // Listen for wallet account changes
+        (function attachPhantomListeners() {
+            const provider = getPhantomProvider();
+            if (!provider || !provider.on) return;
+
+            provider.on('accountChanged', async (nextKey) => {
+                if (!nextKey) {
+                    walletConnected = false;
+                    publicKey = null;
+                    connectWalletBtn.style.display = 'inline-block';
+                    disconnectWalletBtn.style.display = 'none';
+                    walletStatus.style.display = 'none';
+                    burnInputSection.style.display = 'none';
+                    burnAmountInput.value = '';
+                    clearMessages();
+                    return;
+                }
+
+                if (!window.SolanaWeb3) return;
+                publicKey = new window.SolanaWeb3.PublicKey(nextKey.toString());
+                walletConnected = true;
+                walletAddress.textContent = publicKey.toString();
+
+                // Refresh balance for the new account
+                try {
+                    await loadTokenBalance();
+                } catch (e) {
+                    // ignore balance refresh errors
+                }
+            });
+
+            provider.on('disconnect', () => {
+                walletConnected = false;
+                publicKey = null;
+                if (connectWalletBtn) connectWalletBtn.style.display = 'inline-block';
+                if (disconnectWalletBtn) disconnectWalletBtn.style.display = 'none';
+                if (walletStatus) walletStatus.style.display = 'none';
+                if (burnInputSection) burnInputSection.style.display = 'none';
+            });
+        })();
 
         // Copy contract address functionality
         const copyBtn = document.getElementById('copyBtn');

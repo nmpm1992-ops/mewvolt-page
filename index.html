@@ -1903,6 +1903,17 @@
             font-style: italic;
         }
 
+        .burn-swap-footer {
+            margin-top: 22px;
+            padding-top: 16px;
+            border-top: 2px dashed var(--border);
+        }
+
+        .burn-swap-footer-btn {
+            width: 100%;
+            margin-top: 12px;
+        }
+
         .wallet-connect-section {
             margin-bottom: 30px;
             display: flex;
@@ -2626,7 +2637,6 @@
                     <button class="wallet-btn" id="disconnectWalletBtn" style="display: none;">
                         🔓 Disconnect Wallet
                     </button>
-                    <button class="wallet-btn" id="openSwapModalBurn" type="button" data-i18n="swapSolToMewvolt">🔁 Swap SOL → MewVolt</button>
                     <div class="wallet-status" id="walletStatus" style="display: none;">
                         <strong>✅ Wallet Connected:</strong>
                         <div class="wallet-address" id="walletAddress"></div>
@@ -2661,6 +2671,11 @@
                 </div>
 
                 <p class="burn-note" data-i18n="burnNote">Connect your Phantom wallet and enter the amount of tokens you want to burn. This action is irreversible.</p>
+
+                <div class="burn-swap-footer">
+                    <p class="burn-note" style="margin-top: 0;" data-i18n="swapNoTokens">Don’t have MewVolt yet? Swap SOL → MewVolt first.</p>
+                    <button class="wallet-btn burn-swap-footer-btn" id="openSwapModalBurnFooter" type="button" data-i18n="swapSolToMewvolt">🔁 Swap SOL → MewVolt</button>
+                </div>
             </div>
         </div>
     </section>
@@ -2788,13 +2803,14 @@
                 minigamesCommunityDesc: "Compita com amigos!",
                 burnTitle: "🔥 Queimar Tokens",
                 burnDesc: "Ajude a reduzir a oferta total queimando seus tokens MewVolt. Conecte sua carteira Phantom para começar.",
-                burnButton: "🔥 Queimar Tokens (Em Breve)",
+                burnButton: "🔥 Queimar Tokens",
                 burnButtonHero: "🔥 Queimar Tokens",
                 swapSolToMewvolt: "🔁 Trocar SOL → MewVolt",
                 buySwap: "🔁 Comprar / Trocar",
                 swapEmbedTitle: "🔁 Trocar SOL → MewVolt",
                 swapEmbedDesc: "Troque diretamente nesta página usando Jupiter.",
-                burnNote: "Este recurso estará disponível em breve. Conecte sua carteira Phantom para queimar tokens diretamente.",
+                burnNote: "Conecte sua carteira Phantom e digite a quantidade de tokens que você quer queimar. Esta ação é irreversível.",
+                swapNoTokens: "Não tem MewVolt ainda? Troque SOL → MewVolt primeiro.",
                 disclaimer: "<strong data-i18n=\"disclaimerTitle\">⚠️ Aviso Legal:</strong> MewVolt não é um conselho financeiro. Investimentos em criptomoedas carregam riscos significativos. Sempre faça sua própria pesquisa (DYOR) e invista apenas o que pode perder. MewVolt é um memecoin e deve ser tratado como tal. O desempenho passado não garante resultados futuros.",
                 disclaimerTitle: "⚠️ Aviso Legal:"
             },
@@ -2876,13 +2892,14 @@
                 minigamesCommunityDesc: "Compete with friends!",
                 burnTitle: "🔥 Burn Tokens",
                 burnDesc: "Help reduce the total supply by burning your MewVolt tokens. Connect your Phantom wallet to get started.",
-                burnButton: "🔥 Burn Tokens (Coming Soon)",
+                burnButton: "🔥 Burn Tokens",
                 burnButtonHero: "🔥 Burn Tokens",
                 swapSolToMewvolt: "🔁 Swap SOL → MewVolt",
                 buySwap: "🔁 Buy / Swap",
                 swapEmbedTitle: "🔁 Swap SOL → MewVolt",
                 swapEmbedDesc: "Swap directly on this page using Jupiter.",
-                burnNote: "This feature will be available soon. Connect your Phantom wallet to burn tokens directly.",
+                burnNote: "Connect your Phantom wallet and enter the amount of tokens you want to burn. This action is irreversible.",
+                swapNoTokens: "Don’t have MewVolt yet? Swap SOL → MewVolt first.",
                 disclaimer: "<strong data-i18n=\"disclaimerTitle\">⚠️ Disclaimer:</strong> MewVolt is not financial advice. Cryptocurrency investments carry significant risk. Always do your own research (DYOR) and only invest what you can afford to lose. MewVolt is a memecoin and should be treated as such. Past performance does not guarantee future results.",
                 disclaimerTitle: "⚠️ Disclaimer:"
             },
@@ -2964,13 +2981,14 @@
                 minigamesCommunityDesc: "¡Compite con amigos!",
                 burnTitle: "🔥 Quemar Tokens",
                 burnDesc: "Ayuda a reducir la oferta total quemando tus tokens MewVolt. Conecta tu billetera Phantom para comenzar.",
-                burnButton: "🔥 Quemar Tokens (Próximamente)",
+                burnButton: "🔥 Quemar Tokens",
                 burnButtonHero: "🔥 Quemar Tokens",
                 swapSolToMewvolt: "🔁 Cambiar SOL → MewVolt",
                 buySwap: "🔁 Comprar / Intercambiar",
                 swapEmbedTitle: "🔁 Cambiar SOL → MewVolt",
                 swapEmbedDesc: "Intercambia directamente en esta página usando Jupiter.",
-                burnNote: "Esta función estará disponible pronto. Conecta tu billetera Phantom para quemar tokens directamente.",
+                burnNote: "Conecta tu billetera Phantom e introduce la cantidad de tokens que quieres quemar. Esta acción es irreversible.",
+                swapNoTokens: "¿Aún no tienes MewVolt? Cambia SOL → MewVolt primero.",
                 disclaimer: "<strong data-i18n=\"disclaimerTitle\">⚠️ Descargo de Responsabilidad:</strong> MewVolt no es un consejo financiero. Las inversiones en criptomonedas conllevan riesgos significativos. Siempre haz tu propia investigación (DYOR) e invierte solo lo que puedes permitirte perder. MewVolt es un memecoin y debe ser tratado como tal. El rendimiento pasado no garantiza resultados futuros.",
                 disclaimerTitle: "⚠️ Descargo de Responsabilidad:"
             }
@@ -3247,7 +3265,7 @@
         // Swap modal triggers
         const openSwapModalHeroBtn = document.getElementById('openSwapModalHero');
         const openSwapModalHeroActionBtn = document.getElementById('openSwapModalHeroAction');
-        const openSwapModalBurnBtn = document.getElementById('openSwapModalBurn');
+        const openSwapModalBurnFooterBtn = document.getElementById('openSwapModalBurnFooter');
         const swapModal = document.getElementById('swapModal');
         const swapModalCloseBtn = document.getElementById('swapModalCloseBtn');
 
@@ -3311,8 +3329,8 @@
         if (openSwapModalHeroActionBtn) {
             openSwapModalHeroActionBtn.addEventListener('click', openSwapModal);
         }
-        if (openSwapModalBurnBtn) {
-            openSwapModalBurnBtn.addEventListener('click', openSwapModal);
+        if (openSwapModalBurnFooterBtn) {
+            openSwapModalBurnFooterBtn.addEventListener('click', openSwapModal);
         }
         if (swapModalCloseBtn) {
             swapModalCloseBtn.addEventListener('click', closeSwapModal);
